@@ -6,6 +6,7 @@
 
 #include <string>
 #include <string.h>
+#include <iostream>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ ModeSwitch::ModeSwitch()
 
 }
 
-void ModeSwitch::ReadGesture(std::string incGesture)
+void ModeSwitch::ReadGesture(string incGesture)
 {
 	string localGesture = incGesture;
 	OutputDebugString(L"ModeSwitch::ReadGesture - ");
@@ -25,10 +26,23 @@ void ModeSwitch::ReadGesture(std::string incGesture)
 
 void ModeSwitch::Switch(string localGesture)
 {
-	while (localGesture != "fist")
+	// TODO: Not sure if it's actually giving 'locked', gotta look into that
+	if (localGesture == "locked")
 	{
 		
 	}
+
+	string mode = "preset";
+
+	if (mode == "preset")
+	{
+		cout << "you are in preset mode";
+	}
+	else
+	{
+		cout << "you are in preset mode";
+	}
+	
 
 }
 

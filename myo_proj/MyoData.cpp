@@ -60,7 +60,7 @@ int MyoData::ConnectToMyo()
 		return 1;
 	}
 
-}
+} 
 
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 {
