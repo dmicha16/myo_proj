@@ -42,10 +42,10 @@ int MyoData::ConnectToMyo()
 
 		OutputDebugString(L"Before MyoData collector is constructed\n");
 		// TODO: What the shit is this and why is it not working?
-		MyoData collector;
+		//MyoData collector;
 		OutputDebugString(L"After MyoData collector is constructed\n");
 
-		hub.addListener(&collector);
+		hub.addListener(this);
 
 		while (1) {
 			OutputDebugString(L"Debug while loop\n");
