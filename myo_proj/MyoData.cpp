@@ -40,9 +40,8 @@ int MyoData::ConnectToMyo()
 
 		hub.addListener(this);
 
-		while (1) {
-			OutputDebugString(L"Debug while loop\n");
-			hub.run(1000 / 20);
+		while (1) {			
+			hub.run(1000 / 1);
 			print();
 		}
 	}
@@ -65,6 +64,10 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 		myo->unlock(myo::Myo::unlockHold);
 
 		myo->notifyUserAction();
+
+		string poseString = currentPose.toString();
+
+		sendGesture(poseString, isUnlocked);
 	}
 	else {		
 		myo->unlock(myo::Myo::unlockTimed);
@@ -72,33 +75,30 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 		string poseString = currentPose.toString();
 
 		sendGesture(poseString, isUnlocked);
-		cout << '[' << poseString << string(14 - poseString.size(), ' ') << ']' << '\n';
+		//cout << '[' << poseString << string(14 - poseString.size(), ' ') << ']' << '\n';
 	}
 }
 
 void MyoData::sendGesture(string incGesture, bool isUnlocked)
-{
-	bool isUnlockedSend = isUnlocked;
+{	
 	ModeSwitch ms;
-	ms.ReadGesture(incGesture, isUnlockedSend);
+	ms.PresetMode(incGesture, isUnlocked);
 }
 
 void MyoData::print()
 {	
-	std::cout << '\r';
+	std::cout << '\r'; // moves cursor to the beggining of the line	
 
-	bool thing = true;
-
-	if (thing == true) {
+	if (1) {
 		std::string poseString = currentPose.toString();
 
 		std::cout << '[' << poseString << std::string(14 - poseString.size(), ' ') << ']';
 	}
-	else {		
+	/*else {		
 		std::cout << '[' << std::string(8, ' ') << ']' << "[?]" << '[' << std::string(14, ' ') << ']';
-	}
+	}*/
 
-	std::cout << std::flush;
+	//std::cout << std::flush;
 }
 
 

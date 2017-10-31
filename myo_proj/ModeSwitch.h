@@ -10,9 +10,11 @@ class ModeSwitch
 public:
 	ModeSwitch();
 
-	void ReadGesture(string, bool);
+	int ReturnGestureNumber(string, bool);
 
-	void Switch(string, bool);
+	void Switch(int, bool);
+	void PresetMode(string, bool);
+	void ManualMode(string, bool);
 	char SendModeGesture();
 	void StoreJson();
 	~ModeSwitch();

@@ -15,62 +15,78 @@ ModeSwitch::ModeSwitch()
 
 }
 
-void ModeSwitch::ReadGesture(string incGesture, bool isUnlocked)
+int ModeSwitch::ReturnGestureNumber(string incGesture, bool isUnlocked)
 {
-	string localGesture = incGesture;
-
-	bool localIsUnlocked = isUnlocked;
-
-	// TODO: fix this and find .h
-	//_RPT1(localGesture); 	
-	Switch(localGesture, localIsUnlocked);
-}
-
-void ModeSwitch::Switch(string localGesture, bool localIsUnlocked)
-{
-	cout << "do i get here yo";
 	int gestureNumber = 0;
-	cout << "this is what I got: " << localGesture << "\n";
-	if (localGesture == "fist")
+	if (incGesture == "fist")
 	{
 		gestureNumber = 1;
 	}
-	else if (localGesture == "spread")
+	else if (incGesture == "spread")
 	{
 		gestureNumber = 2;
 	}
-	else if (localGesture == "waveIn")
+	else if (incGesture == "waveIn")
 	{
 		gestureNumber = 3;
 	}
-	else if (localGesture == "waveOut")
+	else if (incGesture == "waveOut")
 	{
 		gestureNumber = 4;
 	}
-
-	//cout << localGesture << "\n";
-	if (localIsUnlocked == false)
+	else if (incGesture == "doubleTap")
 	{
-		cout << "entered the normal if";
+		gestureNumber = 5;
+	}
+	
+	return gestureNumber;
+}
+
+void ModeSwitch::Switch(int gestureNumber, bool localIsUnlocked)
+{	
+	
+}
+
+void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked)
+{	
+	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+
+	if (gestureNumber == 1)
+	{
+		ManualMode(recievedGesture, isUnlocked);
+	}
+	else
+	{
+		cout << "you are in preset mode \n";
+	}
+}
+void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked)
+{
+	cout << "you are in manual mode, what would you like to do? \n"
+		<< " ;";	 
+
+	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+
+	if (isUnlocked == false)
+	{
 		switch (gestureNumber)
 		{
-		case 1: cout << "you are in fist mode \n";
+		case 1: cout << "you are in fist mode \n";			
+			//PresetMode(recievedGesture, isUnlocked);
 			break;
-		case 2: cout << "you are in spread mode \n";
+		case 2: cout << "you are in quitting this mode \n";
+			gestureNumber = 0;
 			break;
 		case 3: cout << "you are in waveIn mode \n";
 			break;
-		case 4: cout << "you are in waveOut mode \n";
-			break;
+		case 4: cout << "you are in waveOut mode \n";		
+			break;				
 		default:
 			break;
 		}
 	}
-	else
-	{
-		cout << "entered else";
-	}
 
+	//Switch(gestureNumber, isUnlocked);
 }
 
 char ModeSwitch::SendModeGesture()
