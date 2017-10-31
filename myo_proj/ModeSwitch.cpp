@@ -38,6 +38,10 @@ int ModeSwitch::ReturnGestureNumber(string incGesture, bool isUnlocked)
 	{
 		gestureNumber = 5;
 	}
+	else if (incGesture == "rest")
+	{
+		gestureNumber = 6;
+	}
 	
 	return gestureNumber;
 }
@@ -57,13 +61,12 @@ void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked)
 	}
 	else
 	{
-		cout << "you are in preset mode \n";
+		cout << "you are in preset mode";
 	}
 }
 void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked)
 {
-	cout << "you are in manual mode, what would you like to do? \n"
-		<< " ;";	 
+	cout << "you are in manual mode, what would you like to do?";	 
 
 	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
 
@@ -71,16 +74,17 @@ void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked)
 	{
 		switch (gestureNumber)
 		{
-		case 1: cout << "you are in fist mode \n";			
+		case 1: cout << "you are in fist mode";			
 			//PresetMode(recievedGesture, isUnlocked);
 			break;
-		case 2: cout << "you are in quitting this mode \n";
+		case 2: cout << "you are in quitting this mode";
 			gestureNumber = 0;
 			break;
-		case 3: cout << "you are in waveIn mode \n";
+		case 3: cout << "you are in waveIn mode";
 			break;
-		case 4: cout << "you are in waveOut mode \n";		
-			break;				
+		case 4: cout << "you are in waveOut mode";		
+			break;
+		case 6: cout << "you are in rest mode, nothing is happening";
 		default:
 			break;
 		}
