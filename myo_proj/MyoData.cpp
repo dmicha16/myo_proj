@@ -13,13 +13,11 @@
 
 #include <myo\myo.hpp>
 
+using namespace std;
 
 MyoData::MyoData()
 {
-	//std::array<int8_t, 8> emgSamples;	
-	
 	ConnectToMyo();
-
 }
 
 int MyoData::ConnectToMyo()
@@ -28,22 +26,17 @@ int MyoData::ConnectToMyo()
 
 		myo::Hub hub("com.project.myo_project");
 
-		std::cout << "Attempting to find a Myo..." << std::endl;
+		cout << "Attempting to find a Myo..." << std::endl;
 
 		myo::Myo* myo = hub.waitForMyo(10000);
 
 		if (!myo) {
-			throw std::runtime_error("Unable to find a Myo!");
+			throw runtime_error("Unable to find a Myo!");
 		}
 
-		std::cout << "Connected to a Myo armband!" << std::endl << std::endl;
+		cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
-		myo->setStreamEmg(myo::Myo::streamEmgEnabled);
-
-		OutputDebugString(L"Before MyoData collector is constructed\n");
-		// TODO: What the shit is this and why is it not working?
-		//MyoData collector;
-		OutputDebugString(L"After MyoData collector is constructed\n");
+		myo->setStreamEmg(myo::Myo::streamEmgEnabled);		
 
 		hub.addListener(this);
 
@@ -54,9 +47,9 @@ int MyoData::ConnectToMyo()
 		}
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Error: " << e.what() << std::endl;
-		std::cerr << "Press enter to continue.";
-		std::cin.ignore();
+		cerr << "Error: " << e.what() << endl;
+		cerr << "Press enter to continue.";
+		cin.ignore();
 		return 1;
 	}
 
@@ -65,6 +58,7 @@ int MyoData::ConnectToMyo()
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 {
 	currentPose = pose;
+	isUnlocked = false;
 
 	if (pose != myo::Pose::unknown && pose != myo::Pose::rest) {
 
@@ -75,17 +69,18 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 	else {		
 		myo->unlock(myo::Myo::unlockTimed);
 
-		std::string poseString = currentPose.toString();
+		string poseString = currentPose.toString();
 
-		sendGesture(poseString);
-		std::cout << '[' << poseString << std::string(14 - poseString.size(), ' ') << ']';
+		sendGesture(poseString, isUnlocked);
+		cout << '[' << poseString << string(14 - poseString.size(), ' ') << ']' << '\n';
 	}
 }
 
-void MyoData::sendGesture(std::string incGesture)
+void MyoData::sendGesture(string incGesture, bool isUnlocked)
 {
+	bool isUnlockedSend = isUnlocked;
 	ModeSwitch ms;
-	ms.ReadGesture(incGesture);	
+	ms.ReadGesture(incGesture, isUnlockedSend);
 }
 
 void MyoData::print()

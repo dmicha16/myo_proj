@@ -3,14 +3,16 @@
 #include <string>
 #include <string.h>
 
+using namespace std;
+
 class ModeSwitch
 {
 public:
 	ModeSwitch();
 
-	void ReadGesture(std::string);
+	void ReadGesture(string, bool);
 
-	void Switch(std::string);
+	void Switch(string, bool);
 	char SendModeGesture();
 	void StoreJson();
 	~ModeSwitch();
