@@ -7,7 +7,12 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <stdio.h>  
 
+#include <chrono>
+#include <thread>
+
+#include <myo\myo.hpp>
 using namespace std;
 
 ModeSwitch::ModeSwitch()
@@ -15,35 +20,39 @@ ModeSwitch::ModeSwitch()
 
 }
 
-int ModeSwitch::ReturnGestureNumber(string incGesture, bool isUnlocked)
-{
+int ModeSwitch::ReturnGestureNumber(string incGesture, bool isUnlocked) {
+
 	int gestureNumber = 0;
-	if (incGesture == "fist")
-	{
+
+	if (incGesture == "fist"){
 		gestureNumber = 1;
+		return gestureNumber;
 	}
-	else if (incGesture == "spread")
-	{
+	else if (incGesture == "spread"){
 		gestureNumber = 2;
+		return gestureNumber;
 	}
-	else if (incGesture == "waveIn")
-	{
+	else if (incGesture == "waveIn") {
 		gestureNumber = 3;
+		return gestureNumber;
 	}
-	else if (incGesture == "waveOut")
-	{
+	else if (incGesture == "waveOut") {
 		gestureNumber = 4;
+		return gestureNumber;
 	}
-	else if (incGesture == "doubleTap")
-	{
+	else if (incGesture == "doubleTap") {
 		gestureNumber = 5;
+		return gestureNumber;
 	}
-	else if (incGesture == "rest")
-	{
+	else if (incGesture == "rest") {
 		gestureNumber = 6;
+		return gestureNumber;
 	}
+	else {
+		gestureNumber = 0;
+		return gestureNumber;
+	}	
 	
-	return gestureNumber;
 }
 
 void ModeSwitch::Switch(int gestureNumber, bool localIsUnlocked)
@@ -51,57 +60,65 @@ void ModeSwitch::Switch(int gestureNumber, bool localIsUnlocked)
 	
 }
 
-void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked)
-{	
+void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked) {	
 	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
-
-	if (gestureNumber == 1)
-	{
+	myo::Pose pose;
+	if (gestureNumber == 1) {
 		ManualMode(recievedGesture, isUnlocked);
-	}
-	else
-	{
+	} else {		
 		cout << "you are in preset mode";
 	}
 }
-void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked)
-{
-	cout << "you are in manual mode, what would you like to do?";	 
+void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked){
+	cout << "you are in manual mode";
 
-	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+	if (isUnlocked == false) {
 
-	if (isUnlocked == false)
-	{
-		switch (gestureNumber)
-		{
-		case 1: cout << "you are in fist mode";			
-			//PresetMode(recievedGesture, isUnlocked);
-			break;
-		case 2: cout << "you are in quitting this mode";
-			gestureNumber = 0;
-			break;
-		case 3: cout << "you are in waveIn mode";
-			break;
-		case 4: cout << "you are in waveOut mode";		
-			break;
-		case 6: cout << "you are in rest mode, nothing is happening";
-		default:
-			break;
-		}
+		bool exitGesture = false;
+		int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+		do
+		{			
+			cout << gestureNumber;			
+			int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+			switch (gestureNumber) {
+			case 1: cout << "you are in fist mode";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));								
+				goto reset;
+				break;
+			case 2: cout << "you are in spread mode";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+				break;
+			case 3: cout << "you are in waveIn mode";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+				break;
+			case 4: cout << "you are in waveOut mode";
+				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+				exitGesture = true;
+				gestureNumber = 0;
+				PresetMode(recievedGesture, isUnlocked);
+				break;
+			case 5: cout << "DOUBLE TAP";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+				break;
+			default: cout << "you are in rest mode, nothing is happening";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+				break;
+			}		
+			reset:
+			gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+
+		} while (exitGesture == false);
+		
 	}
-
 	//Switch(gestureNumber, isUnlocked);
 }
 
-char ModeSwitch::SendModeGesture()
-{
+char ModeSwitch::SendModeGesture() {
 	return 0;
 }
 
-void ModeSwitch::StoreJson()
-{
+void ModeSwitch::StoreJson() {
 }
 
-ModeSwitch::~ModeSwitch()
-{
+ModeSwitch::~ModeSwitch(){
 }

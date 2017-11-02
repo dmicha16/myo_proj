@@ -11,7 +11,7 @@ class MyoData : public myo::DeviceListener
 public:
 	MyoData();
 	int ConnectToMyo();
-	void MyoData::sendGesture(string, bool);
+	void sendGesture(string, bool);
 
 	void print();
 
