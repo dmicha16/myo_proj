@@ -7,10 +7,14 @@
 #include <string>
 #include <string.h>
 #include <iostream>
-#include <stdio.h>  
+#include <stdio.h>
+#include <sstream>
+#include <stdexcept>
 
 #include <chrono>
 #include <thread>
+#include "MyoData.h"
+#define _USE_MATH_DEFINES
 
 #include <myo\myo.hpp>
 using namespace std;
@@ -20,7 +24,7 @@ ModeSwitch::ModeSwitch()
 
 }
 
-int ModeSwitch::ReturnGestureNumber(string incGesture, bool isUnlocked) {
+int ModeSwitch::ReturnGestureNumber(string incGesture) {
 
 	int gestureNumber = 0;
 
@@ -61,7 +65,7 @@ void ModeSwitch::Switch(int gestureNumber, bool localIsUnlocked)
 }
 
 void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked) {	
-	int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+	int gestureNumber = ReturnGestureNumber(recievedGesture);
 	myo::Pose pose;
 	if (gestureNumber == 1) {
 		ManualMode(recievedGesture, isUnlocked);
@@ -70,20 +74,20 @@ void ModeSwitch::PresetMode(string recievedGesture, bool isUnlocked) {
 	}
 }
 void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked){
+	
 	cout << "you are in manual mode";
+	bool exitGesture = false;	
+	do
+	{		
+		if (isUnlocked == false) {
+			
+			int gestureNumber = ReturnGestureNumber(recievedGesture);
 
-	if (isUnlocked == false) {
-
-		bool exitGesture = false;
-		int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
-		do
-		{			
-			cout << gestureNumber;			
-			int gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
+			cout << gestureNumber;
 			switch (gestureNumber) {
 			case 1: cout << "you are in fist mode";
 				std::this_thread::sleep_for(std::chrono::milliseconds(2000));								
-				goto reset;
+				gestureNumber = ReturnGestureNumber(recievedGesture);
 				break;
 			case 2: cout << "you are in spread mode";
 				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -100,16 +104,15 @@ void ModeSwitch::ManualMode(string recievedGesture, bool isUnlocked){
 			case 5: cout << "DOUBLE TAP";
 				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 				break;
-			default: cout << "you are in rest mode, nothing is happening";
+			case 6: cout << "you are in rest mode, nothing is happening";
 				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 				break;
-			}		
-			reset:
-			gestureNumber = ReturnGestureNumber(recievedGesture, isUnlocked);
-
-		} while (exitGesture == false);
-		
-	}
+			case 7: cout << "you are in waveIn mode";
+				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+				break;
+			}
+		}
+	} while (exitGesture == false);		
 	//Switch(gestureNumber, isUnlocked);
 }
 

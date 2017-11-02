@@ -10,7 +10,7 @@ class ModeSwitch
 public:
 	ModeSwitch();
 
-	int ReturnGestureNumber(string, bool);
+	int ReturnGestureNumber(string);
 
 	void Switch(int, bool);
 	void PresetMode(string, bool);
