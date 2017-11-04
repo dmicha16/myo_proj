@@ -2,15 +2,16 @@
 
 #include <string>
 #include <string.h>
+#include <myo\myo.hpp>
 
 using namespace std;
 
-class ModeSwitch
+class ModeSwitch : public myo::DeviceListener
 {
 public:
 	ModeSwitch();
 
-	int ReturnGestureNumber(string);
+	int ReturnGestureNumber(string);	
 
 	void Switch(string, bool);
 	void PresetMode(string, bool);

@@ -77,9 +77,8 @@ void ModeSwitch::ManualMode(bool isUnlocked){
 	bool exitGesture = false;	
 	do
 	{		
-		if (isUnlocked == false) {						
+		if (isUnlocked == false) {					
 
-			myo::Pose pose;
 			string newGesture;				
 			int gestureNumber = 0;
 
@@ -125,10 +124,8 @@ void ModeSwitch::ManualMode(bool isUnlocked){
 				break;
 			default: cout << "there are no gestures given";
 				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-				gestureNumber = ReturnGestureNumber(newGesture);
-
-				myo::Pose pose;
-				newGesture = pose.toString();
+				gestureNumber = ReturnGestureNumber(newGesture);								
+				
 				break;
 			}
 		}

@@ -11,9 +11,10 @@ class MyoData : public myo::DeviceListener
 public:
 	MyoData();
 	int ConnectToMyo();
-	string sendGesture(string, bool);
-	string returnCurrentGesture(myo::Myo* myo, uint64_t timestamp, myo::Pose);
+	string sendGesture(string, bool);	
 	void print();
+	int ReturnGestureNumber(string);
+	string returnCurrenGesture(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
 
 	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
 	myo::Pose currentPose;	
