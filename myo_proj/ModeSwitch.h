@@ -12,9 +12,9 @@ public:
 
 	int ReturnGestureNumber(string);
 
-	void Switch(int, bool);
+	void Switch(string, bool);
 	void PresetMode(string, bool);
-	void ManualMode(string, bool);
+	void ManualMode(bool);
 	char SendModeGesture();
 	void StoreJson();
 	~ModeSwitch();

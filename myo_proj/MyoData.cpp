@@ -79,11 +79,19 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
 	}
 }
 
+
+
 string MyoData::sendGesture(string incGesture, bool isUnlocked)
 {	
 	ModeSwitch ms;
-	ms.PresetMode(incGesture, isUnlocked);
+	ms.Switch(incGesture, isUnlocked);
 	return incGesture;
+}
+
+string MyoData::returnCurrentGesture(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
+{
+	string currentGesture = pose.toString();
+	return currentGesture;
 }
 
 void MyoData::print()

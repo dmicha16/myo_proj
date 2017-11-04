@@ -12,7 +12,7 @@ public:
 	MyoData();
 	int ConnectToMyo();
 	string sendGesture(string, bool);
-
+	string returnCurrentGesture(myo::Myo* myo, uint64_t timestamp, myo::Pose);
 	void print();
 
 	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
