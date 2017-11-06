@@ -15,6 +15,8 @@
 #include <myo\myo.hpp>
 using namespace std;
 
+
+
 MyoData::MyoData()
 {
 	ConnectToMyo();	
@@ -40,27 +42,40 @@ int MyoData::ConnectToMyo()
 
 		hub.addListener(this);
 
-		int switchMode = 0;
-		while (1) {
-			hub.run(1000 / 1);
-			SwitchModes();			
+		bool switchMode = false;
+		while (true) {
+			hub.run(1000 / 100);						
+			switchMode = SwitchModes();		
+
+			if (switchMode == true)
+				break;
+			else
+				continue;
 		}
 
-		cout << "did I quit the switch?";
+		if (switchMode == true)	{
+			while (true) {
+				switchMode = false;
+				hub.run(1000 / 1);
+				switchMode = ManualMode();
 
-		if (switchMode == 1)	{
-			while (1) {
-				cout << "do i ever come in here?";
-				hub.run(1000 / 1);
-				ManualMode();
+				if (switchMode == true)
+					break;
+				else
+					continue;
 			}
-		}else {
-			while (1) {
+		}else if (switchMode == true) {
+			while (true) {
+				switchMode = false;
 				hub.run(1000 / 1);
-				//PresetMode();
-				cout << "preset mode bruv";
+				switchMode = PresetMode();
+
+				if (switchMode == true)
+					break;
+				else
+					continue;
 			}
-		}
+		}		
 	}
 	catch (const std::exception& e) {
 		cerr << "Error: " << e.what() << endl;
@@ -73,14 +88,10 @@ int MyoData::ConnectToMyo()
 
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 	currentPose = pose;
-	isUnlocked = false;
+	isUnlocked = false;	
 
-	if (pose != myo::Pose::unknown && pose != myo::Pose::rest) {
-
-		myo->unlock(myo::Myo::unlockHold);		
-
-		myo->notifyUserAction();		
-	}
+	myo->unlock(myo::Myo::unlockHold);		
+	myo->notifyUserAction();
 }
 
 int MyoData::ReturnGestureNumber(string incGesture) {
@@ -118,8 +129,13 @@ int MyoData::ReturnGestureNumber(string incGesture) {
 
 }
 
-void MyoData::SwitchModes()
-{
+bool MyoData::PresetMode() {
+	cout << "yey you made it to preset mode" <<  "\n";
+	return true;
+}
+
+bool MyoData::SwitchModes() {
+	
 	int gestureNumber = 0;
 	gestureNumber = 0;
 	
@@ -127,24 +143,26 @@ void MyoData::SwitchModes()
 	case 1:
 		std::cout << '\r';
 		cout << "You choose: 'Manual Mode'" << string(14, ' ');
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));		
-
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		return true;
 		break;
 
 	case 2:
 		std::cout << '\r';
 		cout << "You choose: 'Preset Mode'" << string(14, ' ');
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));		
+		return false;
 		break;
+
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		std::cout << '\r';
-		cout << "FIST: Manual mode, " << "SPREAD: Preset mode" << string(14, ' ') << "\n";
+		cout << "FIST: Manual mode, " << "SPREAD: Preset mode" << string(14, ' ');
 		break;
 	}
 }
 
-void MyoData::ManualMode() {
+bool MyoData::ManualMode() {
 
 	int gestureNumber = 0;
 	gestureNumber = 0;
@@ -170,21 +188,21 @@ void MyoData::ManualMode() {
 		case 4:
 			std::cout << '\r';
 			cout << "WAVEOUT: Moving end effector: RIGHT" << string(14, ' ');
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));			
-			//PresetMode(recievedGesture, isUnlocked);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));						
 			break;
 
 		case 5:
 			std::cout << '\r';
-			cout << "DOUBLE TAP, you are QUITTING this mode" << string(14, ' ');
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-			gestureNumber = 0;			
+			cout << "DOUBLE TAP, you are QUITTING this mode" << string(14, ' ') << "\n";
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			gestureNumber = 0;
+			return true;
 			break;
 
 		case 6: 
 			std::cout << '\r';
 			cout << "You are in REST, nothing is happening..." << string(14, ' ');
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 			break;		
 		default:
