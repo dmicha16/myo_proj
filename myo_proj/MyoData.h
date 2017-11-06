@@ -16,7 +16,7 @@ public:
 	//string sendGesture(string, bool);	
 	void print();
 	int ReturnGestureNumber(string);
-	void manualMode();
+	void ManualMode();
 
 	string globalGesture;
 
