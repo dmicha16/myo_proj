@@ -17,8 +17,7 @@ using namespace std;
 
 MyoData::MyoData()
 {
-	ConnectToMyo();
-	Switch();
+	ConnectToMyo();	
 }
 
 int MyoData::ConnectToMyo()
@@ -37,15 +36,30 @@ int MyoData::ConnectToMyo()
 
 		cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
-		myo->setStreamEmg(myo::Myo::streamEmgEnabled);		
+		myo->setStreamEmg(myo::Myo::streamEmgEnabled);
 
-		hub.addListener(this);	
+		hub.addListener(this);
 
-		while (1) {			
+		int switchMode = 0;
+		while (1) {
 			hub.run(1000 / 1);
-			print();			
-			ManualMode();
-			//Switch();
+			SwitchModes();			
+		}
+
+		cout << "did I quit the switch?";
+
+		if (switchMode == 1)	{
+			while (1) {
+				cout << "do i ever come in here?";
+				hub.run(1000 / 1);
+				ManualMode();
+			}
+		}else {
+			while (1) {
+				hub.run(1000 / 1);
+				//PresetMode();
+				cout << "preset mode bruv";
+			}
 		}
 	}
 	catch (const std::exception& e) {
@@ -55,7 +69,7 @@ int MyoData::ConnectToMyo()
 		return 1;
 	}
 
-} 
+}
 
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 	currentPose = pose;
@@ -63,21 +77,9 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 
 	if (pose != myo::Pose::unknown && pose != myo::Pose::rest) {
 
-		myo->unlock(myo::Myo::unlockHold);
+		myo->unlock(myo::Myo::unlockHold);		
 
 		myo->notifyUserAction();		
-		currentPose.toString();
-	}
-}
-
-void MyoData::Switch() {
-
-	int gestureNumber = ReturnGestureNumber(currentPose.toString());
-	if (gestureNumber == 1) {
-		cout << "you are in manual mode";		
-	}
-	else {
-		cout << "you are in preset mode";
 	}
 }
 
@@ -114,6 +116,32 @@ int MyoData::ReturnGestureNumber(string incGesture) {
 		return gestureNumber;
 	}
 
+}
+
+void MyoData::SwitchModes()
+{
+	int gestureNumber = 0;
+	gestureNumber = 0;
+	
+	switch (gestureNumber = ReturnGestureNumber(currentPose.toString())) {
+	case 1:
+		std::cout << '\r';
+		cout << "You choose: 'Manual Mode'" << string(14, ' ');
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));		
+
+		break;
+
+	case 2:
+		std::cout << '\r';
+		cout << "You choose: 'Preset Mode'" << string(14, ' ');
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));		
+		break;
+	default:
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::cout << '\r';
+		cout << "FIST: Manual mode, " << "SPREAD: Preset mode" << string(14, ' ') << "\n";
+		break;
+	}
 }
 
 void MyoData::ManualMode() {
@@ -166,23 +194,6 @@ void MyoData::ManualMode() {
 			break;
 		}	
 }
-
-void MyoData::print()
-{	
-	std::cout << '\r'; // moves cursor to the beggining of the line	
-
-	if (1) {
-		string poseString = currentPose.toString();
-
-		cout << '[' << poseString << string(14 - poseString.size(), ' ') << ']';
-	}
-	/*else {		
-		std::cout << '[' << std::string(8, ' ') << ']' << "[?]" << '[' << std::string(14, ' ') << ']';
-	}*/
-
-	//std::cout << std::flush;
-}
-
 
 MyoData::~MyoData()
 {

@@ -12,16 +12,13 @@ class MyoData : public myo::DeviceListener
 {
 public:
 	MyoData();
-	int ConnectToMyo();
-	//string sendGesture(string, bool);	
-	void print();
+	int ConnectToMyo();		
 	int ReturnGestureNumber(string);
 	void ManualMode();
+	//void sendJson(string);
+	void SwitchModes();
+	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);	
 
-	string globalGesture;
-
-	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
-	void Switch();
 	myo::Pose currentPose;	
 	bool isUnlocked;
 	~MyoData();
