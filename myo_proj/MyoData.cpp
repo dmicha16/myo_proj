@@ -19,6 +19,7 @@ using namespace std;
 
 MyoData::MyoData()
 {
+	//Vincent's intial commit
 }
 
 int MyoData::ConnectToMyo()
