@@ -19,14 +19,13 @@ using namespace std;
 
 MyoData::MyoData()
 {
-	ConnectToMyo();	
 }
 
 int MyoData::ConnectToMyo()
 {
 	try {
 
-		myo::Hub hub("com.project.myo_project");
+		myo::Hub hub("com.project.myo_project");		
 
 		cout << "Attempting to find a Myo..." << std::endl;
 
@@ -36,9 +35,7 @@ int MyoData::ConnectToMyo()
 			throw runtime_error("Unable to find a Myo!");
 		}
 
-		cout << "Connected to a Myo armband!" << std::endl << std::endl;
-
-		myo->setStreamEmg(myo::Myo::streamEmgEnabled);
+		cout << "Connected to a Myo armband!" << std::endl << std::endl;	
 
 		hub.addListener(this);
 
@@ -56,7 +53,7 @@ int MyoData::ConnectToMyo()
 		if (switchMode == true)	{
 			while (true) {
 				switchMode = false;
-				hub.run(1000 / 1);
+				hub.run(1000 / 100);
 				switchMode = ManualMode();
 
 				if (switchMode == true)
@@ -90,7 +87,8 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 	currentPose = pose;
 	isUnlocked = false;	
 
-	myo->unlock(myo::Myo::unlockHold);		
+	myo->unlock(myo::Myo::unlockHold);
+	
 	myo->notifyUserAction();
 }
 
@@ -214,5 +212,5 @@ bool MyoData::ManualMode() {
 }
 
 MyoData::~MyoData()
-{
+{	
 }
