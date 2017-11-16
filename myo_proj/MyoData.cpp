@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MyoData.h"
+
 #include <array>
 #include <iostream>
 #include <sstream>
@@ -14,8 +15,7 @@
 
 #include <myo\myo.hpp>
 using namespace std;
-
-
+using json = nlohmann::json;
 
 MyoData::MyoData()
 {	
@@ -39,40 +39,52 @@ int MyoData::ConnectToMyo()
 
 		hub.addListener(this);
 
-		bool switchMode = false;
 		while (true) {
 			hub.run(1000 / 100);						
-			switchMode = SwitchModes();		
+			mode_type_ = SwitchModes();		
 
-			if (switchMode == true)
+			if (mode_type_ == 'M' || 'P' || 'D')
 				break;
 			else
 				continue;
 		}
 
-		if (switchMode == true)	{
+		if (mode_type_ == 'M')	{
+
 			while (true) {
-				switchMode = false;
 				hub.run(1000 / 100);
-				switchMode = ManualMode();
+				mode_type_ = ManualMode();
 
-				if (switchMode == true)
+				if (mode_type_ == true)
 					break;
 				else
 					continue;
 			}
-		}else if (switchMode == true) {
+		} else if (mode_type_ == 'P') {
+
 			while (true) {
-				switchMode = false;
 				hub.run(1000 / 1);
-				switchMode = PresetMode();
+				mode_type_ = PresetMode();
 
-				if (switchMode == true)
+				if (mode_type_ == true)
 					break;
 				else
 					continue;
 			}
-		}		
+		} else if(mode_type_ == 'D') {
+
+			while(true) {
+				hub.run(1000 / 1);
+				mode_type_ = PresetMode();
+
+				if(mode_type_ == true)
+					break;
+				else
+					continue;
+			}
+
+		}
+
 	}
 	catch (const std::exception& e) {
 		cerr << "Error: " << e.what() << endl;
@@ -127,12 +139,7 @@ int MyoData::ReturnGestureNumber(string incGesture) {
 
 }
 
-bool MyoData::PresetMode() {
-	cout << "yey you made it to preset mode" <<  "\n";
-	return true;
-}
-
-bool MyoData::SwitchModes() {
+char MyoData::SwitchModes() {
 	
 	int gestureNumber = 0;
 	gestureNumber = 0;
@@ -142,51 +149,63 @@ bool MyoData::SwitchModes() {
 		std::cout << '\r';
 		cout << "You choose: 'Manual Mode'" << string(14, ' ');
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		return true;
+		return 'M';
 		break;
 
 	case 2:
 		std::cout << '\r';
 		cout << "You choose: 'Preset Mode'" << string(14, ' ');
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));		
-		return false;
+		return 'P';
+		break;
+
+	case 3:
+		std::cout << '\r';
+		cout << "You choose: 'Developer Mode'" << string(14, ' ');
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		return 'D';
 		break;
 
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		std::cout << '\r';
-		cout << "FIST: Manual mode, " << "SPREAD: Preset mode" << string(14, ' ');
+		cout << "FIST: Manual Mode, " << "SPREAD: Preset Mode" << "WAVEIN: Developer Mode" << string(14, ' ');
 		break;
 	}
 }
 
-bool MyoData::ManualMode() {
+char MyoData::ManualMode() {
 
 	int gestureNumber = 0;
 	gestureNumber = 0;
+	mode_type_ = 'M';
 		switch (gestureNumber = ReturnGestureNumber(currentPose.toString())) {
 		case 1:
 			std::cout << '\r';
 			cout << "FIST: Moving end effector: DOWN" << string(14, ' ');
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			SendJson(mode_type_, currentPose.toString());
 			break;
 
 		case 2:
 			std::cout << '\r';
 			cout << "SPREAD: Moving end effector: UP" << string(14, ' ');
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			SendJson(mode_type_, currentPose.toString());
 			break;
 
 		case 3:
 			std::cout << '\r'; 
 			cout << "WAVEIN: Moving end effector: LEFT" << string(14, ' ');
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			SendJson(mode_type_, currentPose.toString());
 			break;
 
 		case 4:
 			std::cout << '\r';
 			cout << "WAVEOUT: Moving end effector: RIGHT" << string(14, ' ');
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));						
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			SendJson(mode_type_, currentPose.toString());
 			break;
 
 		case 5:
@@ -194,21 +213,40 @@ bool MyoData::ManualMode() {
 			cout << "DOUBLE TAP, you are QUITTING this mode" << string(14, ' ') << "\n";
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			gestureNumber = 0;
-			return true;
+			return 'E';
 			break;
 
 		case 6: 
 			std::cout << '\r';
 			cout << "You are in REST, nothing is happening..." << string(14, ' ');
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));			
 
 			break;		
 		default:
 			std::cout << '\r';
-			cout << "Manual mode." << string(14, ' ');
+			cout << "Uninterpretable gesture." << string(25, ' ');
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			break;
 		}	
+}
+
+char MyoData::PresetMode() {
+	cout << "yey you made it to preset mode" << "\n";
+	return 'E';
+}
+
+char MyoData::DeveloperMode() {
+	cout << "yey you made it to devel mode" << "\n";
+	return 'E';
+}
+
+void MyoData::SendJson(char p_mode, string p_gesture) {
+	
+	pose_json_ = {
+		{"mode", p_mode},
+		{"gesture", p_gesture},		
+	};
+	cout << pose_json_ << string(15, ' ');
 }
 
 MyoData::~MyoData()
