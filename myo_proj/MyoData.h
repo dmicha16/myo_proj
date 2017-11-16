@@ -3,7 +3,7 @@
 #include <myo/myo.hpp>
 #include <string>
 #include <string.h>
-//#include "json.hpp"
+#include "json.hpp"
 
 using namespace std;
 
@@ -15,12 +15,12 @@ public:
 	int ConnectToMyo();		
 	int ReturnGestureNumber(string);
 
-	char ManualMode();
+	int ManualMode();
 	char PresetMode();
 	char DeveloperMode();
 	
-	//void SendJson(char, string); //later, add boolen gyro_stop here
-	char SwitchModes();
+	void SendJson(char, string); //later, add boolen gyro_stop here
+	int SwitchModes();
 	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
 
 	myo::Pose currentPose;	
@@ -28,7 +28,8 @@ public:
 	~MyoData();
 
 private:
-	char mode_type_;	
+	int mode_type_;	
+	int gesture_number_;
 	
 };
 
