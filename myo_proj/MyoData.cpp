@@ -25,76 +25,65 @@ MyoData::MyoData()
 }
 
 int MyoData::ConnectToMyo()
-{
-	try {
+{	
+	myo::Hub hub("com.project.myo_project");
 
-		myo::Hub hub("com.project.myo_project");		
+	cout << "Attempting to find a Myo..." << std::endl;
 
-		cout << "Attempting to find a Myo..." << std::endl;
+	myo::Myo* myo = hub.waitForMyo(10000);
 
-		myo::Myo* myo = hub.waitForMyo(10000);
+	if (!myo) {
+		throw runtime_error("Unable to find a Myo!");
+	}
 
-		if (!myo) {
-			throw runtime_error("Unable to find a Myo!");
-		}
+	cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
-		cout << "Connected to a Myo armband!" << std::endl << std::endl;	
-
-		hub.addListener(this);
+	hub.addListener(this);
+	 
+	while (true) {
+		hub.run(1000 / 10);						
+		mode_type_ = SwitchModes();			
+		if (/*mode_type_ == 'M' || 'P' || 'D'*/false)
+			break;
+		else
+			continue;
+	}
+	OutputDebugString(L"Test2\n");
+	if (mode_type_ == 'M')	{
 
 		while (true) {
-			hub.run(1000 / 10);						
-			//mode_type_ = SwitchModes();			
-			if ('M' || 'P' || 'D')
+			hub.run(1000 / 100);
+			mode_type_ = ManualMode();
+
+			if (mode_type_ == 'E')
 				break;
 			else
 				continue;
 		}
-		OutputDebugString(L"Test2\n");
-		if (mode_type_ == 'M')	{
+	} else if (mode_type_ == 'P') {
 
-			while (true) {
-				hub.run(1000 / 100);
-				mode_type_ = ManualMode();
+		while (true) {
+			hub.run(1000 / 1);
+			mode_type_ = PresetMode();
 
-				if (mode_type_ == 'E')
-					break;
-				else
-					continue;
-			}
-		} else if (mode_type_ == 'P') {
+			if (mode_type_ == 'E')
+				break;
+			else
+				continue;
+		}
+	} else if(mode_type_ == 'D') {
 
-			while (true) {
-				hub.run(1000 / 1);
-				mode_type_ = PresetMode();
+		while(true) {
+			hub.run(1000 / 1);
+			mode_type_ = PresetMode();
 
-				if (mode_type_ == 'E')
-					break;
-				else
-					continue;
-			}
-		} else if(mode_type_ == 'D') {
-
-			while(true) {
-				hub.run(1000 / 1);
-				mode_type_ = PresetMode();
-
-				if(mode_type_ == 'E')
-					break;
-				else
-					continue;
-			}
-
+			if(mode_type_ == 'E')
+				break;
+			else
+				continue;
 		}
 
 	}
-	catch (const std::exception& e) {
-		cerr << "Error: " << e.what() << endl;
-		cerr << "Press enter to continue.";
-		cin.ignore();
-		return 1;
-	}
-
 }
 
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
