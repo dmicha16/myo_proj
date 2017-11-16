@@ -33,7 +33,7 @@ int MyoData::ConnectToMyo()
 {	
 	myo::Hub hub("com.project.myo_project");
 
-	cout << "Attempting to find a Myo..." << std::endl;
+	cout << "Attempting to find a Myo..." << string(5, ' ');
 
 	myo::Myo* myo = hub.waitForMyo(10000);
 
@@ -163,7 +163,7 @@ int MyoData::SwitchModes() {
 int MyoData::ManualMode() {
 
 	int gesture_number_ = 0;	
-	mode_type_ = 0;
+	mode_type_ = MODE_MANUAL;
 		switch (gesture_number_ = ReturnGestureNumber(currentPose.toString())) {
 		case 1:
 			std::cout << '\r';
@@ -208,34 +208,34 @@ int MyoData::ManualMode() {
 		}	
 }
 
-char MyoData::PresetMode() {
+int MyoData::PresetMode() {
 
 	int gesture_number_ = 0;
-	mode_type_ = 2;
+	mode_type_ = MODE_PRESET;
 	
 	switch(gesture_number_ = ReturnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
 		cout << "Closing gripper." << string(55, ' ');
-		SendJson(mode_type_, currentPose.toString());
+		//SendJson(mode_type_, currentPose.toString());
 		break;
 
 	case 2:
 		std::cout << '\r';
 		cout << "Moving to extend." << string(55, ' ');
-		SendJson(mode_type_, currentPose.toString());
+		//SendJson(mode_type_, currentPose.toString());
 		break;
 
 	case 3:
 		std::cout << '\r';
 		cout << "Moving to user." << string(55, ' ');
-		SendJson(mode_type_, currentPose.toString());
+		//SendJson(mode_type_, currentPose.toString());
 		break;
 
 	case 4:
 		std::cout << '\r';
 		cout << "Moving home." << string(55, ' ');
-		SendJson(mode_type_, currentPose.toString());
+		//SendJson(mode_type_, currentPose.toString());
 		break;
 
 	case 5:
@@ -257,7 +257,7 @@ char MyoData::PresetMode() {
 	}
 }
 
-char MyoData::DeveloperMode() {
+int MyoData::DeveloperMode() {
 	cout << "yey you made it to devel mode" << "\n";
 	return 'E';
 }
@@ -270,7 +270,7 @@ void MyoData::SendJson(char p_mode, string p_gesture) {
 		{"gesture", p_gesture},		
 	};
 	cout << pose_json_ << string(15, ' ');
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	DELAY_OF_ONE_SEC;
 }
 
 MyoData::~MyoData() {

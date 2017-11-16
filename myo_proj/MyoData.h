@@ -16,8 +16,8 @@ public:
 	int ReturnGestureNumber(string);
 
 	int ManualMode();
-	char PresetMode();
-	char DeveloperMode();
+	int PresetMode();
+	int DeveloperMode();
 	
 	void SendJson(char, string); //later, add boolen gyro_stop here
 	int SwitchModes();
