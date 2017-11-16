@@ -11,9 +11,14 @@
 #include <thread>
 #include <iomanip>
 #include <ctime>
-	
 
-#define _USE_MATH_DEFINES
+
+#define MODE_MANUAL 1
+#define MODE_PRESET 2
+#define MODE_DEVEL 3
+#define MODE_EXIT 4
+
+#define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 #include <myo\myo.hpp>
 using namespace std;
@@ -41,52 +46,41 @@ int MyoData::ConnectToMyo()
 	hub.addListener(this);
 	 
 	while (true) {
-		hub.run(1000 / 10);
-		mode_type_ = 0;
+		hub.run(1000 / 10);		
 		mode_type_ = SwitchModes();
 
-		if (mode_type_ != 1 || 2 || 3) {
+		if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL)
 			break;
-		} else {
-			continue;
-		}
-			
 	}
 
-	//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	DELAY_OF_ONE_SEC;
 
-	if (mode_type_ == 1) {
+	if (mode_type_ == MODE_MANUAL) {
 
 		while (true) {
 			hub.run(1000 / 10);
 			mode_type_ = ManualMode();
 
-			if (mode_type_ == 4)
-				break;
-			else
-				continue;
+			if (mode_type_ == MODE_EXIT)
+				break;			
 		}
-	} else if (mode_type_ == 2) {
+	} else if (mode_type_ == MODE_PRESET) {
 
 		while (true) {
 			hub.run(1000 / 10);
 			mode_type_ = PresetMode();
 
-			if (mode_type_ == 4)
-				break;
-			else
-				continue;
+			if (mode_type_ == MODE_EXIT)
+				break;			
 		}
-	} else if(mode_type_ == 3) {
+	} else if(mode_type_ == MODE_DEVEL) {
 
 		while(true) {
 			hub.run(1000 / 10);
 			mode_type_ = PresetMode();
 
-			if(mode_type_ == 4)
+			if(mode_type_ == MODE_EXIT)
 				break;
-			else
-				continue;
 		}
 	} else {
 		cout << "You shouldn't be able to read this.";
@@ -144,19 +138,19 @@ int MyoData::SwitchModes() {
 	case 1:
 		std::cout << '\r';
 		cout << "You choose: 'Manual Mode'" << string(45, ' ');		
-		return 1;
+		return MODE_MANUAL;
 		break;
 
 	case 2:
 		std::cout << '\r';
 		cout << "You choose: 'Preset Mode'" << string(45, ' ');		
-		return 2;
+		return MODE_PRESET;
 		break;
 
 	case 3:
 		std::cout << '\r';
 		cout << "You choose: 'Developer Mode'" << string(45, ' ');		
-		return 3;
+		return MODE_DEVEL;
 		break;
 
 	default:		
@@ -199,7 +193,7 @@ int MyoData::ManualMode() {
 			std::cout << '\r';
 			cout << "DOUBLE TAP, you are QUITTING this mode" << string(25, ' ') << "\n";			
 			gesture_number_ = 0;
-			return 4;
+			return MODE_EXIT;
 			break;
 
 		case 6: 
@@ -218,7 +212,7 @@ char MyoData::PresetMode() {
 
 	int gesture_number_ = 0;
 	mode_type_ = 2;
-	cout << "FIST: Close the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << string(15, ' ');
+	
 	switch(gesture_number_ = ReturnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
@@ -248,12 +242,12 @@ char MyoData::PresetMode() {
 		std::cout << '\r';
 		cout << "DOUBLE TAP, you are QUITTING this mode" << string(55, ' ') << "\n";
 		gesture_number_ = 0;
-		return 4;
+		return MODE_EXIT;
 		break;
 
 	case 6:
 		std::cout << '\r';
-		cout << "You are in REST, nothing is happening..." << string(55, ' ');
+		cout << "FIST: Close the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << string(15, ' ');
 		break;
 
 	default:
