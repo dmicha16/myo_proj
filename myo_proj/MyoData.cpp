@@ -46,7 +46,8 @@ int MyoData::connectToMyo()
 	cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
 	hub.addListener(this);
-	 
+
+	mode_type_ = 0;
 	while (true) {
 		hub.run(1000 / 10);		
 		mode_type_ = switchModes();
@@ -84,12 +85,11 @@ int MyoData::connectToMyo()
 			if(mode_type_ == MODE_EXIT)
 				break;
 		}
-	} else if(mode_type_ == MODE_EXIT) {
-		exit(0);
-	}	
+	}/* else if(mode_type_ == MODE_EXIT) {
+		connectToMyo();
 	else {
 		cout << "You shouldn't be able to read this.";
-	}
+	}*/
 
 	connectToMyo();
 
@@ -104,31 +104,31 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 	myo->notifyUserAction();
 }
 
-int MyoData::returnGestureNumber(string incGesture) {	
+int MyoData::returnGestureNumber(string p_inc_gesture) {	
 
 	int gesture_number_ = 0;
 
-	if (incGesture == "fist") {
+	if (p_inc_gesture == "fist") {
 		gesture_number_ = 1;
 		return gesture_number_;
 	}
-	else if (incGesture == "fingersSpread") {
+	else if (p_inc_gesture == "fingersSpread") {
 		gesture_number_ = 2;
 		return gesture_number_;
 	}
-	else if (incGesture == "waveIn") {
+	else if (p_inc_gesture == "waveIn") {
 		gesture_number_ = 3;
 		return gesture_number_;
 	}
-	else if (incGesture == "waveOut") {
+	else if (p_inc_gesture == "waveOut") {
 		gesture_number_ = 4;
 		return gesture_number_;
 	}
-	else if (incGesture == "doubleTap") {
+	else if (p_inc_gesture == "doubleTap") {
 		gesture_number_ = 5;
 		return gesture_number_;
 	}
-	else if (incGesture == "rest") {
+	else if (p_inc_gesture == "rest") {
 		gesture_number_ = 6;
 		return gesture_number_;
 	}
@@ -145,19 +145,19 @@ int MyoData::switchModes() {
 	switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
-		cout << "You choose: 'Manual Mode'" << string(45, ' ');		
+		cout << "You choose: 'Manual Mode'" << string(55, ' ');		
 		return MODE_MANUAL;
 		break;
 
 	case 2:
 		std::cout << '\r';
-		cout << "You choose: 'Preset Mode'" << string(45, ' ');		
+		cout << "You choose: 'Preset Mode'" << string(55, ' ');		
 		return MODE_PRESET;
 		break;
 
 	case 3:
 		std::cout << '\r';
-		cout << "You choose: 'Developer Mode'" << string(45, ' ');		
+		cout << "You choose: 'Developer Mode'" << string(55, ' ');		
 		return MODE_DEVEL;
 		break;
 
@@ -212,7 +212,8 @@ int MyoData::manualMode() {
 
 		case 6: 
 			std::cout << '\r';
-			cout << "You are in REST, nothing is happening..." << string(25, ' ');			
+			cout << "You are in REST, nothing is happening..." << string(25, ' ');
+			sendJson(mode_type_, currentPose.toString());
 			break;		
 
 		default:
@@ -272,7 +273,7 @@ int MyoData::presetMode() {
 }
 
 int MyoData::developerMode() {
-	cout << "yey you made it to devel mode" << "\n";
+	cout << "yey you made it to devel mode";
 	return MODE_EXIT;
 }
 
@@ -303,7 +304,7 @@ void MyoData::sendJson(int p_mode, string p_gesture) {
 void MyoData::saveJson(string p_output_json) {
 	
 	json_file.open("json_log.txt");
-	json_file << p_output_json << "\n";
+	json_file << p_output_json << "\n";	
 	
 }
 
@@ -322,5 +323,5 @@ void MyoData::saveJson(string p_output_json) {
 }*/
 
 MyoData::~MyoData() {
-	json_file.close();	
+	json_file.close();
 }
