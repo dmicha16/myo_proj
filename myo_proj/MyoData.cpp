@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <ctime>
 #include <ratio>
-
+#include <myo\myo.hpp>
 
 #define MODE_MANUAL 1
 #define MODE_PRESET 2
@@ -20,7 +20,7 @@
 
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-#include <myo\myo.hpp>
+
 using namespace std;
 using json = nlohmann::json;
 using namespace std::chrono;
@@ -28,7 +28,6 @@ using namespace std::chrono;
 MyoData::MyoData()
 {
 	json_id_ = 0;
-	json_file.open("json_log.txt");
 	
 }
 
@@ -52,7 +51,7 @@ int MyoData::connectToMyo()
 		hub.run(1000 / 10);		
 		mode_type_ = switchModes();
 
-		if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL)
+		if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL || mode_type_ == MODE_EXIT)
 			break;
 	}
 
@@ -85,7 +84,10 @@ int MyoData::connectToMyo()
 			if(mode_type_ == MODE_EXIT)
 				break;
 		}
-	} else {
+	} else if(mode_type_ == MODE_EXIT) {
+		exit(0);
+	}	
+	else {
 		cout << "You shouldn't be able to read this.";
 	}
 
@@ -138,7 +140,7 @@ int MyoData::returnGestureNumber(string incGesture) {
 
 int MyoData::switchModes() {
 	
-	int gesture_number_ = 0;	
+	gesture_number_ = 0;	
 	
 	switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:
@@ -159,16 +161,22 @@ int MyoData::switchModes() {
 		return MODE_DEVEL;
 		break;
 
+	case 5:
+		std::cout << '\r';
+		cout << "Quitting the program!'" << string(65, ' ');
+		return MODE_EXIT;
+		break;
+
 	default:		
 		std::cout << '\r';
-		cout << "FIST: Manual Mode, " << "SPREAD: Preset Mode, " << "WAVEIN: Developer Mode" << string(15, ' ');				
+		cout << "FIST: Manual Mode, " << "SPREAD: Preset Mode, " << "WAVEIN: Developer Mode, " << "DOUBLETAP: Quit." << string(15, ' ');
 		break;
 	}
 }
 
 int MyoData::manualMode() {
 
-	int gesture_number_ = 0;	
+	gesture_number_ = 0;	
 	mode_type_ = MODE_MANUAL;
 		switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
 		case 1:
@@ -216,7 +224,7 @@ int MyoData::manualMode() {
 
 int MyoData::presetMode() {
 
-	int gesture_number_ = 0;
+	gesture_number_ = 0;
 	mode_type_ = MODE_PRESET;
 	
 	switch(gesture_number_ = returnGestureNumber(currentPose.toString())) {
@@ -271,9 +279,9 @@ int MyoData::developerMode() {
 void MyoData::sendJson(int p_mode, string p_gesture) {
 
 	json_id_++;
-	json pose_json_;	
+	json pose_json_;		
 
-	string current_time_ = __TIMESTAMP__;
+	current_time_ = __TIMESTAMP__;
 
 	pose_json_ = {
 		{"id", json_id_},
@@ -284,15 +292,35 @@ void MyoData::sendJson(int p_mode, string p_gesture) {
 	
 	output_json_ = pose_json_.dump();
 	saveJson(output_json_);
+
+	if(p_mode == MODE_PRESET) {
+		// wait for confirmation from the robot that it has finished the operation to continue.
+	}
+
 	DELAY_OF_ONE_SEC;
 }
 
 void MyoData::saveJson(string p_output_json) {
 	
-	json_file << "entry: " << p_output_json << "\n";
+	json_file.open("json_log.txt");
+	json_file << p_output_json << "\n";
+	
 }
 
-MyoData::~MyoData() {
+/*string MyoData::returnCurrTime() {
 
-	json_file.close();
+	time_t curr_time;
+	tm * curr_tm;
+	char date_string[100];
+	char time_string[100];
+
+	time(&curr_time);
+	curr_tm = localtime(&curr_time);	
+	strftime(time_string, 50, "Current time is %T", curr_tm);
+
+	return curr_tm;
+}*/
+
+MyoData::~MyoData() {
+	json_file.close();	
 }

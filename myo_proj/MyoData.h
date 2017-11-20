@@ -29,6 +29,8 @@ private:
 	void sendJson(int, string);
 	void saveJson(string);
 
+	string returnCurrTime();
+
 	int switchModes();
 	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
 
@@ -40,6 +42,7 @@ private:
 	int gesture_number_;
 	int json_id_;
 	string output_json_;
+	string current_time_;
 
 	ofstream json_file;
 
