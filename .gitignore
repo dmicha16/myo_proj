@@ -263,3 +263,7 @@ __pycache__/
 *.pyc
 /myo_proj/json.hpp
 /myo_proj/json_log.txt
+/myo_proj/Serial.cpp
+/myo_proj/Serial.h
+/myo_proj/SerialPort.cpp
+/myo_proj/SerialPort.h

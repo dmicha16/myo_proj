@@ -11,7 +11,8 @@
 #include <iomanip>
 #include <ctime>
 #include <ratio>
-#include <myo\myo.hpp>
+
+#define DATA_LENGTH 255
 
 #define MODE_MANUAL 1
 #define MODE_PRESET 2
@@ -19,7 +20,6 @@
 #define MODE_EXIT 4
 
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
 
 using namespace std;
 using json = nlohmann::json;
@@ -29,6 +29,7 @@ MyoData::MyoData()
 {
 	json_id_ = 0;
 	json_file.open("json_log.txt");
+	initSerial();
 	
 }
 
@@ -48,7 +49,8 @@ int MyoData::connectToMyo()
 
 	hub.addListener(this);
 
-	mode_type_ = 0;
+	DELAY_OF_ONE_SEC;
+	
 	while (1) {
 		hub.run(1000 / 25);		
 		mode_type_ = switchModes();
@@ -64,7 +66,7 @@ int MyoData::connectToMyo()
 		if (mode_type_ == MODE_MANUAL) {
 
 			while (true) {
-				hub.run(1000 / 25);
+				hub.run(1000 / 20);
 				mode_type_ = manualMode();
 
 				if (mode_type_ == MODE_EXIT)
@@ -74,7 +76,7 @@ int MyoData::connectToMyo()
 		else if (mode_type_ == MODE_PRESET) {
 
 			while (true) {
-				hub.run(1000 / 25);
+				hub.run(1000 / 20);
 				mode_type_ = presetMode();
 
 				if (mode_type_ == MODE_EXIT)
@@ -84,14 +86,14 @@ int MyoData::connectToMyo()
 		else if (mode_type_ == MODE_DEVEL) {
 
 			while (true) {
-				hub.run(1000 / 25);
+				hub.run(1000 / 20);
 				mode_type_ = developerMode();
 
 				if (mode_type_ == MODE_EXIT)
 					break;
 			}			
 		}
-
+		
 		connectToMyo();
 		cout << "you shouldnt be able to read this";
 
@@ -160,11 +162,11 @@ int MyoData::switchModes() {
 		return MODE_PRESET;
 		break;
 
-	case 3:
+	/*case 3:
 		std::cout << '\r';
 		cout << "You choose: 'Developer Mode'" << string(55, ' ');		
 		return MODE_DEVEL;
-		break;
+		break;*/
 
 	case 5:
 		std::cout << '\r';
@@ -218,7 +220,7 @@ int MyoData::manualMode() {
 		case 6: 
 			std::cout << '\r';
 			cout << "You are in REST, nothing is happening..." << string(25, ' ');
-			sendJson(mode_type_, currentPose.toString());
+			//sendJson(mode_type_, currentPose.toString());
 			break;		
 
 		default:
@@ -282,34 +284,74 @@ int MyoData::developerMode() {
 	return MODE_EXIT;
 }
 
-void MyoData::sendJson(int p_mode, string p_gesture) {
+void MyoData::populateJson(int p_mode, string p_gesture) {
 
 	json_id_++;
 	json pose_json_;		
 
-	current_time_ = __TIMESTAMP__;
+	// current_time_ = __TIMESTAMP__; this timestamp is the construction of the program and only constructed once.
 
 	pose_json_ = {
-		{"id", json_id_},
-		{"mode", p_mode},
-		{"gesture", p_gesture},
-		{"timestamp", current_time_},
+		{ "id", json_id_ },
+		{ "mode", p_mode },
+		{ "gesture", p_gesture }
 	};
-	
+
 	output_json_ = pose_json_.dump();
-	saveJson(output_json_);
 
-	if(p_mode == MODE_PRESET) {
-		// wait for confirmation from the robot that it has finished the operation to continue.
+	if (p_mode == MODE_MANUAL) {
+
+		saveJson(p_mode, output_json_);
+		sendToSerial(output_json_);
 	}
+	else if (p_mode == MODE_PRESET) {
 
-	DELAY_OF_ONE_SEC;
+	}	
 }
 
-void MyoData::saveJson(string p_output_json) {
+void MyoData::saveJson(int p_mode, string p_output_json) {
 	
 	json_file << p_output_json << "\n";	
-	
+
+}
+
+void MyoData::initSerial() {
+
+	port_name_ = "\\\\.\\COM4";
+	arduino_obj_ = new SerialPort(port_name_);
+	cout << "is connected: " << arduino_obj_->isConnected() << "\n";
+}
+
+void MyoData::sendToSerial(string p_output_json) {
+
+	char *output_serial_ = new char[p_output_json.length() + 1];
+
+	arduino_obj_ = new SerialPort(port_name_);
+	if (arduino_obj_->isConnected()) {
+
+		bool hasWritten = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
+
+		if (hasWritten)
+			cout << "Data Written Successfully" << endl;
+		else
+			cout << "Data was not written" << endl;
+	}
+}
+
+bool MyoData::recieveFromSerial() {
+
+	char recieved_string[DATA_LENGTH];
+
+	arduino_obj_ = new SerialPort(port_name_);
+	if (arduino_obj_->isConnected()) {
+
+		int has_read = arduino_obj_->readSerialPort(recieved_string, DATA_LENGTH);
+
+		if (has_read)
+			cout << "some logic";
+		else
+			cout << "Error occured reading data";
+	}
 }
 
 /*string MyoData::returnCurrTime() {

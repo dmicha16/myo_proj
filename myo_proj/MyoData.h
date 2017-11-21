@@ -1,11 +1,14 @@
 #pragma once
 
-#include <myo/myo.hpp>
 #include <string>
 #include <string.h>
-#include "json.hpp"
+#include <cstring>
 #include <fstream>
 #include <iostream>
+
+#include "json.hpp"
+#include "SerialPort.h"
+#include <myo/myo.hpp>
 
 using namespace std;
 
@@ -25,14 +28,14 @@ private:
 	int manualMode();
 	int presetMode();
 	int developerMode();
-
-	void sendJson(int, string);
-	void saveJson(string);
-
-	string returnCurrTime();
-
 	int switchModes();
-	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
+
+	void populateJson(int, string);
+	void saveJson(int, string);	
+	void initSerial();
+	void sendToSerial(string);
+	bool recieveFromSerial();	
+	void onPose(myo::Myo*, uint64_t, myo::Pose);
 
 	myo::Pose currentPose;
 	
@@ -41,12 +44,14 @@ private:
 	int mode_type_;	
 	int gesture_number_;
 	int json_id_;
+	
 	string output_json_;
 	string current_time_;
 
-	ofstream json_file;
+	char* port_name_;	
 
-	
+	SerialPort *arduino_obj_;
+	ofstream json_file;	
 	
 };
 
