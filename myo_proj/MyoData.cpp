@@ -28,6 +28,7 @@ using namespace std::chrono;
 MyoData::MyoData()
 {
 	json_id_ = 0;
+	json_file.open("json_log.txt");
 	
 }
 
@@ -48,8 +49,8 @@ int MyoData::connectToMyo()
 	hub.addListener(this);
 
 	mode_type_ = 0;
-	while (true) {
-		hub.run(1000 / 10);		
+	while (1) {
+		hub.run(1000 / 25);		
 		mode_type_ = switchModes();
 
 		if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL || mode_type_ == MODE_EXIT)
@@ -58,12 +59,12 @@ int MyoData::connectToMyo()
 
 	DELAY_OF_ONE_SEC;
 
-	if (mode_type_ != MODE_EXIT) {
+	if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL) {
 
 		if (mode_type_ == MODE_MANUAL) {
 
 			while (true) {
-				hub.run(1000 / 10);
+				hub.run(1000 / 25);
 				mode_type_ = manualMode();
 
 				if (mode_type_ == MODE_EXIT)
@@ -73,7 +74,7 @@ int MyoData::connectToMyo()
 		else if (mode_type_ == MODE_PRESET) {
 
 			while (true) {
-				hub.run(1000 / 10);
+				hub.run(1000 / 25);
 				mode_type_ = presetMode();
 
 				if (mode_type_ == MODE_EXIT)
@@ -83,16 +84,17 @@ int MyoData::connectToMyo()
 		else if (mode_type_ == MODE_DEVEL) {
 
 			while (true) {
-				hub.run(1000 / 10);
+				hub.run(1000 / 25);
 				mode_type_ = developerMode();
 
 				if (mode_type_ == MODE_EXIT)
 					break;
-			}
-
-		} else {
-			connectToMyo();
+			}			
 		}
+
+		connectToMyo();
+		cout << "you shouldnt be able to read this";
+
 	} else {
 		exit(0);
 	}
@@ -306,7 +308,6 @@ void MyoData::sendJson(int p_mode, string p_gesture) {
 
 void MyoData::saveJson(string p_output_json) {
 	
-	json_file.open("json_log.txt");
 	json_file << p_output_json << "\n";	
 	
 }
