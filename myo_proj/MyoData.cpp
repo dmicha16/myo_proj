@@ -58,41 +58,44 @@ int MyoData::connectToMyo()
 
 	DELAY_OF_ONE_SEC;
 
-	if (mode_type_ == MODE_MANUAL) {
+	if (mode_type_ != MODE_EXIT) {
 
-		while (true) {
-			hub.run(1000 / 10);
-			mode_type_ = manualMode();
+		if (mode_type_ == MODE_MANUAL) {
 
-			if (mode_type_ == MODE_EXIT)
-				break;			
+			while (true) {
+				hub.run(1000 / 10);
+				mode_type_ = manualMode();
+
+				if (mode_type_ == MODE_EXIT)
+					break;
+			}
 		}
-	} else if (mode_type_ == MODE_PRESET) {
+		else if (mode_type_ == MODE_PRESET) {
 
-		while (true) {
-			hub.run(1000 / 10);
-			mode_type_ = presetMode();
+			while (true) {
+				hub.run(1000 / 10);
+				mode_type_ = presetMode();
 
-			if (mode_type_ == MODE_EXIT)
-				break;			
+				if (mode_type_ == MODE_EXIT)
+					break;
+			}
 		}
-	} else if(mode_type_ == MODE_DEVEL) {
+		else if (mode_type_ == MODE_DEVEL) {
 
-		while(true) {
-			hub.run(1000 / 10);
-			mode_type_ = developerMode();
+			while (true) {
+				hub.run(1000 / 10);
+				mode_type_ = developerMode();
 
-			if(mode_type_ == MODE_EXIT)
-				break;
+				if (mode_type_ == MODE_EXIT)
+					break;
+			}
+
+		} else {
+			connectToMyo();
 		}
-	}/* else if(mode_type_ == MODE_EXIT) {
-		connectToMyo();
-	else {
-		cout << "You shouldn't be able to read this.";
-	}*/
-
-	connectToMyo();
-
+	} else {
+		exit(0);
+	}
 }
 
 void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
