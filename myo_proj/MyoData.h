@@ -32,7 +32,6 @@ private:
 
 	void populateJson(int, string);
 	void saveJson(int, string);	
-	void initSerial();
 	void sendToSerial(string);
 	bool recieveFromSerial();	
 	void onPose(myo::Myo*, uint64_t, myo::Pose);

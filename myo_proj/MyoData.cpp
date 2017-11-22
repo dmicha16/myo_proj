@@ -19,6 +19,8 @@
 #define MODE_DEVEL 3
 #define MODE_EXIT 4
 
+#define COM6 "\\\\.\\COM6"
+
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 using namespace std;
@@ -29,8 +31,8 @@ MyoData::MyoData()
 {
 	json_id_ = 0;
 	json_file.open("json_log.txt");
-	initSerial();
-	
+	arduino_obj_ = new SerialPort(COM6);
+	cout << COM6 << " is connected: " << arduino_obj_->isConnected();	
 }
 
 int MyoData::connectToMyo()
@@ -97,7 +99,9 @@ int MyoData::connectToMyo()
 		connectToMyo();
 		cout << "you shouldnt be able to read this";
 
-	} else {
+	} 
+	
+	else {
 		exit(0);
 	}
 }
@@ -189,25 +193,25 @@ int MyoData::manualMode() {
 		case 1:
 			std::cout << '\r';
 			cout << "FIST: Moving end effector: DOWN" << string(25, ' ');			
-			sendJson(mode_type_, currentPose.toString());
+			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 2:
 			std::cout << '\r';
 			cout << "SPREAD: Moving end effector: UP" << string(25, ' ');			
-			sendJson(mode_type_, currentPose.toString());
+			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 3:
 			std::cout << '\r'; 
 			cout << "WAVEIN: Moving end effector: LEFT" << string(25, ' ');			
-			sendJson(mode_type_, currentPose.toString());
+			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 4:
 			std::cout << '\r';
 			cout << "WAVEOUT: Moving end effector: RIGHT" << string(25, ' ');			
-			sendJson(mode_type_, currentPose.toString());
+			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 5:
@@ -220,7 +224,7 @@ int MyoData::manualMode() {
 		case 6: 
 			std::cout << '\r';
 			cout << "You are in REST, nothing is happening..." << string(25, ' ');
-			//sendJson(mode_type_, currentPose.toString());
+			//populateJson(mode_type_, currentPose.toString());
 			break;		
 
 		default:
@@ -239,25 +243,25 @@ int MyoData::presetMode() {
 	case 1:
 		std::cout << '\r';
 		cout << "Closing gripper." << string(55, ' ');
-		sendJson(mode_type_, currentPose.toString());
+		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 2:
 		std::cout << '\r';
 		cout << "Moving to extend." << string(55, ' ');
-		sendJson(mode_type_, currentPose.toString());
+		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 3:
 		std::cout << '\r';
 		cout << "Moving to user." << string(55, ' ');
-		sendJson(mode_type_, currentPose.toString());
+		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 4:
 		std::cout << '\r';
 		cout << "Moving home." << string(55, ' ');
-		sendJson(mode_type_, currentPose.toString());
+		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 5:
@@ -311,22 +315,13 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 void MyoData::saveJson(int p_mode, string p_output_json) {
 	
-	json_file << p_output_json << "\n";	
-
-}
-
-void MyoData::initSerial() {
-
-	port_name_ = "\\\\.\\COM4";
-	arduino_obj_ = new SerialPort(port_name_);
-	cout << "is connected: " << arduino_obj_->isConnected() << "\n";
+	json_file << p_output_json << "\n";
 }
 
 void MyoData::sendToSerial(string p_output_json) {
 
-	char *output_serial_ = new char[p_output_json.length() + 1];
-
-	arduino_obj_ = new SerialPort(port_name_);
+	char *output_serial_ = new char[p_output_json.length() + 1];	
+	
 	if (arduino_obj_->isConnected()) {
 
 		bool hasWritten = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
@@ -352,6 +347,7 @@ bool MyoData::recieveFromSerial() {
 		else
 			cout << "Error occured reading data";
 	}
+	return 0;
 }
 
 /*string MyoData::returnCurrTime() {
