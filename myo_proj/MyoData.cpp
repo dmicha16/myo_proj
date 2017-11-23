@@ -308,31 +308,42 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 	}
 	else if (p_mode == MODE_PRESET) {
 
-		bool response_from_robot = false;
+		string response_from_robot;
+		bool not_empty = false;
 
 		for (size_t i = 0; i < 5; i++) {
 
 			DELAY_OF_ONE_SEC;
 			cout << '\r';
 			cout << "Waiting for response from the robot.." << string(55, ' ');
-			if (recieveFromSerial()) {
-				response_from_robot = true;
+			response_from_robot = recieveFromSerial();
+
+			if (response_from_robot != "") {
+				not_empty = true;
+				saveJson(p_mode, response_from_robot);
 				break;
 			}
 		}
 
-		if (!response_from_robot) {
+		if (!not_empty) {
 			cout << '\r';
 			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
+			// TODO (David): Let's discuss what should happen here..
+			DELAY_OF_ONE_SEC;
 			DELAY_OF_ONE_SEC;
 			exit(0);
 		}
 	}	
 }
 
-void MyoData::saveJson(int p_mode, string p_output_json) {
+void MyoData::saveJson(int p_mode, string p_json) {
 	
-	output_json_file << p_output_json << "\n";
+	if (p_mode == MODE_MANUAL) {
+		output_json_file << p_json << "\n";
+	}
+	else {
+		inc_json_file << p_json << "\n";
+	}
 }
 
 void MyoData::sendToSerial(string p_output_json) {
@@ -350,22 +361,25 @@ void MyoData::sendToSerial(string p_output_json) {
 	}
 }
 
-bool MyoData::recieveFromSerial() {
+string MyoData::recieveFromSerial() {
 
-	char recieved_string[DATA_LENGTH];
+	char recieved_char[DATA_LENGTH];
 
-	arduino_obj_ = new SerialPort(port_name_);
+	string recieved_string;
+
 	if (arduino_obj_->isConnected()) {
 
-		int has_read = arduino_obj_->readSerialPort(recieved_string, DATA_LENGTH);
+		int has_read = arduino_obj_->readSerialPort(recieved_char, DATA_LENGTH);
+
+		recieved_string.assign(recieved_char, DATA_LENGTH);
 
 		if (has_read) {			
 			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved");
-			return true;
+			return "";
 		}
 		else {
 			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved");
-			return false;
+			return "";
 		}		
 	}
 }
