@@ -50,7 +50,8 @@ private:
 	char* port_name_;	
 
 	SerialPort *arduino_obj_;
-	ofstream json_file;	
+	ofstream output_json_file;	
+	ofstream inc_json_file;
 	
 };
 

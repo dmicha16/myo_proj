@@ -21,7 +21,7 @@
 
 #define COM6 "\\\\.\\COM6"
 
-#define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+#define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
 
 using namespace std;
 using json = nlohmann::json;
@@ -30,9 +30,10 @@ using namespace std::chrono;
 MyoData::MyoData()
 {
 	json_id_ = 0;
-	json_file.open("json_log.txt");
+	output_json_file.open("output_json_file.txt");
+	inc_json_file.open("inc_json_file.txt");
 	arduino_obj_ = new SerialPort(COM6);
-	cout << COM6 << " is connected: " << arduino_obj_->isConnected();	
+	cout << COM6 << " is connected: " << arduino_obj_->isConnected() << "\n";	
 }
 
 int MyoData::connectToMyo()
@@ -98,7 +99,6 @@ int MyoData::connectToMyo()
 		
 		connectToMyo();
 		cout << "you shouldnt be able to read this";
-
 	} 
 	
 	else {
@@ -242,25 +242,25 @@ int MyoData::presetMode() {
 	switch(gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
-		cout << "Closing gripper." << string(55, ' ');
+		cout << "Closing gripper." << string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 2:
 		std::cout << '\r';
-		cout << "Moving to extend." << string(55, ' ');
+		cout << "Moving to extend." << string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 3:
 		std::cout << '\r';
-		cout << "Moving to user." << string(55, ' ');
+		cout << "Moving to user." << string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 4:
 		std::cout << '\r';
-		cout << "Moving home." << string(55, ' ');
+		cout << "Moving home." << string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
@@ -291,9 +291,7 @@ int MyoData::developerMode() {
 void MyoData::populateJson(int p_mode, string p_gesture) {
 
 	json_id_++;
-	json pose_json_;		
-
-	// current_time_ = __TIMESTAMP__; this timestamp is the construction of the program and only constructed once.
+	json pose_json_;			
 
 	pose_json_ = {
 		{ "id", json_id_ },
@@ -310,12 +308,31 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 	}
 	else if (p_mode == MODE_PRESET) {
 
+		bool response_from_robot = false;
+
+		for (size_t i = 0; i < 5; i++) {
+
+			DELAY_OF_ONE_SEC;
+			cout << '\r';
+			cout << "Waiting for response from the robot.." << string(55, ' ');
+			if (recieveFromSerial()) {
+				response_from_robot = true;
+				break;
+			}
+		}
+
+		if (!response_from_robot) {
+			cout << '\r';
+			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
+			DELAY_OF_ONE_SEC;
+			exit(0);
+		}
 	}	
 }
 
 void MyoData::saveJson(int p_mode, string p_output_json) {
 	
-	json_file << p_output_json << "\n";
+	output_json_file << p_output_json << "\n";
 }
 
 void MyoData::sendToSerial(string p_output_json) {
@@ -324,12 +341,12 @@ void MyoData::sendToSerial(string p_output_json) {
 	
 	if (arduino_obj_->isConnected()) {
 
-		bool hasWritten = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
+		bool has_written = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
 
-		if (hasWritten)
-			cout << "Data Written Successfully" << endl;
+		if (has_written)
+			OutputDebugString(L"MyoData::sendToSerial -> Data sent");
 		else
-			cout << "Data was not written" << endl;
+			OutputDebugString(L"MyoData::sendToSerial -> Data not sent");
 	}
 }
 
@@ -342,12 +359,15 @@ bool MyoData::recieveFromSerial() {
 
 		int has_read = arduino_obj_->readSerialPort(recieved_string, DATA_LENGTH);
 
-		if (has_read)
-			cout << "some logic";
-		else
-			cout << "Error occured reading data";
+		if (has_read) {			
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved");
+			return true;
+		}
+		else {
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved");
+			return false;
+		}		
 	}
-	return 0;
 }
 
 /*string MyoData::returnCurrTime() {
@@ -365,5 +385,6 @@ bool MyoData::recieveFromSerial() {
 }*/
 
 MyoData::~MyoData() {
-	json_file.close();
+	inc_json_file.close();
+	output_json_file.close();
 }

@@ -269,3 +269,5 @@ __pycache__/
 /myo_proj/SerialPort.h
 /myo_proj/dependencies/include/SerialPort.h
 /myo_proj/dependencies/lib/SerialPort.cpp
+/myo_proj/inc_json_file.txt
+/myo_proj/output_json_file.txt
