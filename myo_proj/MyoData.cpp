@@ -18,9 +18,7 @@
 #define MODE_PRESET 2
 #define MODE_DEVEL 3
 #define MODE_EXIT 4
-
-#define COM6 "\\\\.\\COM6"
-
+#define COM6 "\\\\.\\COM6"	
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
 
 using namespace std;
@@ -33,7 +31,7 @@ MyoData::MyoData()
 	output_json_file.open("output_json_file.txt");
 	inc_json_file.open("inc_json_file.txt");
 	arduino_obj_ = new SerialPort(COM6);
-	cout << COM6 << " is connected: " << arduino_obj_->isConnected() << "\n";	
+	//cout << COM6 << " is connected: " << arduino_obj_->isConnected() << "\n";	
 }
 
 int MyoData::connectToMyo()
