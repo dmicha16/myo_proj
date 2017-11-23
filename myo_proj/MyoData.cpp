@@ -355,9 +355,9 @@ void MyoData::sendToSerial(string p_output_json) {
 		bool has_written = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
 
 		if (has_written)
-			OutputDebugString(L"MyoData::sendToSerial -> Data sent");
+			OutputDebugString(L"MyoData::sendToSerial -> Data sent \n");
 		else
-			OutputDebugString(L"MyoData::sendToSerial -> Data not sent");
+			OutputDebugString(L"MyoData::sendToSerial -> Data not sent \n");
 	}
 }
 
@@ -374,11 +374,11 @@ string MyoData::recieveFromSerial() {
 		recieved_string.assign(recieved_char, DATA_LENGTH);
 
 		if (has_read) {			
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved");
-			return "";
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
+			return recieved_string;
 		}
 		else {
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved");
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
 			return "";
 		}		
 	}
