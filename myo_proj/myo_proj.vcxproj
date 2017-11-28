@@ -105,12 +105,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\davic\source\repos\myo-sdk-win-0.9.0\include;G:\P3\Myo\myo-sdk-win-0.9.0\include;C:\Users\Vincent\source\repos\myo-sdk-win-0.9.0\include;C:\Users\Steffan\Desktop\3rd Semester\P3 - Project\Thalmic_MyoArmBand\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\davic\source\myo-sdk-win-0.9.0\include;C:\Users\davic\source\repos\myo-sdk-win-0.9.0\include;G:\P3\Myo\myo-sdk-win-0.9.0\include;C:\Users\Vincent\source\repos\myo-sdk-win-0.9.0\include;C:\Users\Steffan\Desktop\3rd Semester\P3 - Project\Thalmic_MyoArmBand\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\davic\source\repos\myo-sdk-win-0.9.0\lib;G:\P3\Myo\myo-sdk-win-0.9.0\lib;C:\Users\Vincent\source\repos\myo-sdk-win-0.9.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\davic\source\myo-sdk-win-0.9.0\lib;C:\Users\davic\source\repos\myo-sdk-win-0.9.0\lib;G:\P3\Myo\myo-sdk-win-0.9.0\lib;C:\Users\Vincent\source\repos\myo-sdk-win-0.9.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>myo64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -31,7 +31,8 @@ private:
 	int switchModes();
 
 	void populateJson(int, string);
-	void saveJson(int, string);	
+	void saveJson(int, string);
+	void saveIncJson(int, string);
 	void sendToSerial(string);
 
 	string recieveFromSerial();	

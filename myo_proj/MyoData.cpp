@@ -18,7 +18,7 @@
 #define MODE_PRESET 2
 #define MODE_DEVEL 3
 #define MODE_EXIT 4
-#define COM6 "\\\\.\\COM6"	
+#define COM6 "\\\\.\\COM4"	
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
 
 using namespace std;
@@ -309,6 +309,8 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		string response_from_robot;
 		bool not_empty = false;
 
+		saveJson(p_mode, output_json_);
+
 		for (size_t i = 0; i < 5; i++) {
 
 			DELAY_OF_ONE_SEC;
@@ -318,11 +320,10 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 			if (response_from_robot != "") {
 				not_empty = true;
-				saveJson(p_mode, response_from_robot);
+				saveIncJson(p_mode, response_from_robot);
 				break;
 			}
 		}
-
 		if (!not_empty) {
 			cout << '\r';
 			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
@@ -336,12 +337,12 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 void MyoData::saveJson(int p_mode, string p_json) {
 	
-	if (p_mode == MODE_MANUAL) {
-		output_json_file << p_json << "\n";
-	}
-	else {
-		inc_json_file << p_json << "\n";
-	}
+	output_json_file << p_json << "\n";
+}
+
+void MyoData::saveIncJson(int p_mode, string p_json) {
+
+	inc_json_file << p_json << "\n";
 }
 
 void MyoData::sendToSerial(string p_output_json) {
