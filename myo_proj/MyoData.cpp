@@ -301,7 +301,7 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 	if (p_mode == MODE_MANUAL) {
 
-		saveJson(p_mode, output_json_);
+		saveJson(output_json_);
 		sendToSerial(output_json_);
 	}
 	else if (p_mode == MODE_PRESET) {
@@ -309,7 +309,7 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		string response_from_robot;
 		bool not_empty = false;
 
-		saveJson(p_mode, output_json_);
+		saveJson(output_json_);
 
 		for (size_t i = 0; i < 5; i++) {
 
@@ -320,7 +320,7 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 			if (response_from_robot != "") {
 				not_empty = true;
-				saveIncJson(p_mode, response_from_robot);
+				saveIncJson(response_from_robot);
 				break;
 			}
 		}
