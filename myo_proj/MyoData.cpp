@@ -335,12 +335,12 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 	}	
 }
 
-void MyoData::saveJson(int p_mode, string p_json) {
+void MyoData::saveJson(string p_json) {
 	
 	output_json_file << p_json << "\n";
 }
 
-void MyoData::saveIncJson(int p_mode, string p_json) {
+void MyoData::saveIncJson(string p_json) {
 
 	inc_json_file << p_json << "\n";
 }
