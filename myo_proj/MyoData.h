@@ -50,8 +50,8 @@ private:
 	string current_time_;
 
 	char* port_name_;	
-
 	SerialPort *arduino_obj_;
+	
 	ofstream output_json_file;	
 	ofstream inc_json_file;
 	

@@ -18,7 +18,7 @@
 #define MODE_PRESET 2
 #define MODE_DEVEL 3
 #define MODE_EXIT 4
-#define COM6 "\\\\.\\COM4"	
+#define COM6 "\\\\.\\COM4"		
 #define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
 
 using namespace std;
@@ -29,8 +29,9 @@ MyoData::MyoData()
 {
 	json_id_ = 0;
 	output_json_file.open("output_json_file.txt");
-	inc_json_file.open("inc_json_file.txt");
+	inc_json_file.open("inc_json_file.txt");	
 	arduino_obj_ = new SerialPort(COM6);
+	
 	//cout << COM6 << " is connected: " << arduino_obj_->isConnected() << "\n";	
 }
 
@@ -152,7 +153,7 @@ int MyoData::switchModes() {
 	gesture_number_ = 0;	
 	
 	switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
-	case 1:
+	case 1:  
 		std::cout << '\r';
 		cout << "You choose: 'Manual Mode'" << string(55, ' ');		
 		return MODE_MANUAL;
@@ -297,7 +298,13 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		{ "gesture", p_gesture }
 	};
 
-	output_json_ = pose_json_.dump();
+	//output_json_ = pose_json_.dump();
+
+	int local_gesture_number = returnGestureNumber(p_gesture);
+
+	std::stringstream sstm;
+	sstm << p_mode;
+	output_json_ = sstm.str();
 
 	if (p_mode == MODE_MANUAL) {
 
@@ -310,13 +317,14 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		bool not_empty = false;
 
 		saveJson(output_json_);
+		sendToSerial(output_json_);
 
 		for (size_t i = 0; i < 5; i++) {
 
 			DELAY_OF_ONE_SEC;
 			cout << '\r';
 			cout << "Waiting for response from the robot.." << string(55, ' ');
-			response_from_robot = recieveFromSerial();
+			//response_from_robot = recieveFromSerial();
 
 			if (response_from_robot != "") {
 				not_empty = true;
@@ -347,16 +355,24 @@ void MyoData::saveIncJson(string p_json) {
 
 void MyoData::sendToSerial(string p_output_json) {
 
-	char *output_serial_ = new char[p_output_json.length() + 1];	
-	
+	char *output_serial_ = _strdup(p_output_json.c_str());
+	// std::vector<char> output_serial_(p_output_json.c_str(), p_output_json.c_str() + p_output_json.size() + 1u);
+
+	/*vector<char> v(p_output_json.begin(), p_output_json.end());
+	char* output_serial_ = &v[0];*/
+
 	if (arduino_obj_->isConnected()) {
 
 		bool has_written = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
 
-		if (has_written)
+		if (has_written) {
 			OutputDebugString(L"MyoData::sendToSerial -> Data sent \n");
-		else
+			free(output_serial_);
+		}			
+		else {
 			OutputDebugString(L"MyoData::sendToSerial -> Data not sent \n");
+			free(output_serial_);
+		}
 	}
 }
 
@@ -364,17 +380,17 @@ string MyoData::recieveFromSerial() {
 
 	char recieved_char[DATA_LENGTH];
 
-	string recieved_string;
+	string received_string;
 
 	if (arduino_obj_->isConnected()) {
 
 		int has_read = arduino_obj_->readSerialPort(recieved_char, DATA_LENGTH);
 
-		recieved_string.assign(recieved_char, DATA_LENGTH);
+		received_string.assign(recieved_char, DATA_LENGTH);
 
 		if (has_read) {			
 			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
-			return recieved_string;
+			return received_string;
 		}
 		else {
 			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
