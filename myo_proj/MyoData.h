@@ -35,7 +35,7 @@ private:
 	void saveIncJson(string);
 	void sendToSerial(string);
 
-	string recieveFromSerial();	
+	string recieveFromSerial();
 	void onPose(myo::Myo*, uint64_t, myo::Pose);
 
 	myo::Pose currentPose;
