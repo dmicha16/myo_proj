@@ -5,6 +5,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 
 #include "json.hpp"
 #include "SerialPort.h"
@@ -55,6 +56,8 @@ private:
 	ofstream output_json_file;	
 	ofstream inc_json_file;
 	
+	time_t now_construct;
+	time_t now_serial_read;
 };
 
 

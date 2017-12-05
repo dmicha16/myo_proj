@@ -9,10 +9,10 @@
 #include <chrono>
 #include <thread>
 #include <iomanip>
-#include <ctime>
 #include <ratio>
 
 #define DATA_LENGTH 255
+#define DATA_LENGTH_OF_1 1
 
 #define MODE_MANUAL 1
 #define MODE_PRESET 2
@@ -31,6 +31,8 @@ MyoData::MyoData()
 	output_json_file.open("output_json_file.txt");
 	inc_json_file.open("inc_json_file.txt");	
 	arduino_obj_ = new SerialPort(COM6);
+
+	now_construct = time(nullptr);
 
 	string mode;	
 	cout << "Press 'd' and 'Enter' to go into developer mode. \n";
@@ -335,31 +337,47 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		saveJson(output_json_);
 		sendToSerial(output_json_);
 
-		for (size_t i = 0; i < 5; i++) {
+		for (size_t i = 0; i < 500; i++) {
 
-			DELAY_OF_ONE_SEC;
+			//DELAY_OF_ONE_SEC;
 			cout << '\r';
-			cout << "Waiting for response from the robot.." << string(55, ' ');			
+			cout << "Waiting for response from the robot.." << string(55, ' ');
+		
 			response_from_robot = recieveFromSerial();
-			saveIncJson(response_from_robot);
-			//char *inc_json_char = &response_from_robot[0];
 
-			stringstream response;
-			response << response_from_robot;
-			OutputDebugString(L"PopulateJson response: \n");
-			OutputDebugStringA(response.str().c_str());
+			if (response_from_robot != "") {
+				stringstream response;
+				response << response_from_robot;
 
-			json incoming_json = json::parse(response);
-			OutputDebugString(L"populateJson -> Successful parsing to Json \n");
+				try {
+					json incoming_json = json::parse(response);
+					OutputDebugString(L"populateJson -> Successful parsing to Json \n");
+					cout << incoming_json["from_arduino"] << "\n";
 
-			if (incoming_json["action_status"] == "true") {
-				cout << "\r";
-				cout << "Response is ok! \n" << string(50, ' ');
-				empty_response = true;
-				
-				connectToMyo();
-			}
-		}
+					if (incoming_json["from_arduino"] == true) {
+						if (incoming_json["action_status"] == true) {
+							cout << "\r";
+							cout << "Response is ok! \n" << string(50, ' ');
+							empty_response = true;
+
+							//connectToMyo();
+
+							OutputDebugString(L"Successfully parsed the incoming Json");
+							exit(0);
+						}
+						else {
+							cout << '\r';
+							cout << "Robot has not finished working yet!" << string(55, ' ');
+						}
+					}
+				}
+				catch (const std::exception&) {
+					cout << "\r";
+					cout << "it didnt parse bruv" << string(55, ' ');
+				}
+			}	
+		} 
+
 		if (!empty_response) {
 			cout << '\r';
 			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
@@ -389,44 +407,61 @@ void MyoData::sendToSerial(string p_output_json) {
 	if (arduino_obj_->isConnected()) {
 
 		bool has_written = arduino_obj_->writeSerialPort(output_serial_, DATA_LENGTH);
-
+		
 		if (has_written) {
-			OutputDebugString(L"MyoData::sendToSerial -> Data sent \n");			
-		}			
-		else {
-			OutputDebugString(L"MyoData::sendToSerial -> Data not sent \n");			
+			OutputDebugString(L"MyoData::sendToSerial -> Data sent \n");
+			now_serial_read = time(nullptr);
 		}
+		else {
+			OutputDebugString(L"MyoData::sendToSerial -> Data not sent \n");
+		}	
 	}
 }
 
 string MyoData::recieveFromSerial() {
 
-	char recieved_char[DATA_LENGTH];
+	char recieved_char[DATA_LENGTH_OF_1];
 
 	string received_string;
+	string complete_string;
+	if (arduino_obj_->isConnected()) {	
 
-	if (arduino_obj_->isConnected()) {
+		int has_read = arduino_obj_->readSerialPort(recieved_char, DATA_LENGTH_OF_1);
+		received_string.assign(recieved_char, DATA_LENGTH_OF_1);
 
-		int has_read = arduino_obj_->readSerialPort(recieved_char, DATA_LENGTH);
+		if (received_string == "{") {
 
-		received_string.assign(recieved_char, DATA_LENGTH);
-		int counter = 1;
+			complete_string.append(received_string);
 
-		if (has_read) {			
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
-			if (counter == 1)
-			{
-				stringstream ss;
-				ss << received_string;
-				OutputDebugStringA(ss.str().c_str());
-				return received_string;
-			}
+			do {
+				has_read = arduino_obj_->readSerialPort(recieved_char, DATA_LENGTH_OF_1);
+
+				received_string.assign(recieved_char, DATA_LENGTH_OF_1);
+				complete_string.append(received_string);
+
+				if (has_read) {
+					//OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
+
+				}
+				else {
+					//OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
+				}
+
+			} while (recieved_char[0] != '}');
+
+			saveIncJson(complete_string);
+			stringstream msg;
+			msg << "MyoData::recieveFromSerial -> " << complete_string << "\n";
+			OutputDebugStringA(msg.str().c_str());
+			return complete_string;
 		}
 		else {
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
-			return "";
-		}		
+			cout << "\r";
+			cout << "shits fucked" << string(55, ' ');
+		}
 	}
+	//return "{'from_arduino':false,'message':'this is a message','action_status':false,'counter':47,'servo 1 position':467}";
+	return "";
 }
 
 /*string MyoData::returnCurrTime() {
