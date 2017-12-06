@@ -263,7 +263,7 @@ int MyoData::presetMode() {
 	switch(gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
-		cout << "Closing gripper." << string(65, ' ');
+		cout << "Closing/Opening gripper." << string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
@@ -294,7 +294,7 @@ int MyoData::presetMode() {
 
 	case 6:
 		std::cout << '\r';
-		cout << "FIST: Close the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << string(15, ' ');
+		cout << "FIST: Close/Open the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << string(15, ' ');
 		break;
 
 	default:
@@ -322,7 +322,11 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		{ "gesture", p_gesture }
 	};
 
-	output_json_ = pose_json_.dump();	
+	output_json_ = pose_json_.dump();
+	jsonHandler(output_json_, p_mode);
+}
+
+void MyoData::jsonHandler(string p_json, int p_mode) {
 
 	if (p_mode == MODE_MANUAL) {
 
@@ -339,10 +343,9 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 		for (size_t i = 0; i < 500; i++) {
 
-			//DELAY_OF_ONE_SEC;
 			cout << '\r';
 			cout << "Waiting for response from the robot.." << string(55, ' ');
-		
+
 			response_from_robot = recieveFromSerial();
 
 			if (response_from_robot != "") {
@@ -354,8 +357,12 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 					OutputDebugString(L"populateJson -> Successful parsing to Json \n");
 					cout << incoming_json["from_arduino"] << "\n";
 
-					if (incoming_json["from_arduino"] == true) {
-						if (incoming_json["action_status"] == true) {
+					if (incoming_json["mode"] == MODE_PRESET) {
+
+						saveIncJson(response_from_robot);
+
+						
+						if (incoming_json["job_status"] == "success") {
 							cout << "\r";
 							cout << "Response is ok! \n" << string(50, ' ');
 							empty_response = true;
@@ -365,38 +372,55 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 							OutputDebugString(L"Successfully parsed the incoming Json");
 							exit(0);
 						}
-						else {
+						else if (incoming_json["job_status"] == "in progress") {
+
 							cout << '\r';
 							cout << "Robot has not finished working yet!" << string(55, ' ');
 						}
+						else {
+							cout << '\r';
+							cout << "The robot has failed to execute the operation!" << string(55, ' ');
+
+							DELAY_OF_ONE_SEC;
+							DELAY_OF_ONE_SEC;
+
+							exit(0);
+						}
+						
+					}
+					else {
+						saveIncJson(response_from_robot);
 					}
 				}
 				catch (const std::exception&) {
 					cout << "\r";
 					cout << "it didnt parse bruv" << string(55, ' ');
 				}
-			}	
-		} 
+			}
+		}
 
 		if (!empty_response) {
 			cout << '\r';
 			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
-			
+
 			DELAY_OF_ONE_SEC;
 			DELAY_OF_ONE_SEC;
-			exit(0);
+			//exit(0);
 		}
-	}	
+	}
 }
 
 void MyoData::saveJson(string p_json) {
-	
-	output_json_file << p_json << "\n";
+
+
+	auto local_time = returnCurrTime();
+	output_json_file << local_time << "-> " << p_json << "\n";
 }
 
 void MyoData::saveIncJson(string p_json) {
 
-	inc_json_file << p_json << "\n";
+	auto local_time = returnCurrTime();
+	inc_json_file << local_time << "-> " << p_json << "\n";
 }
 
 void MyoData::sendToSerial(string p_output_json) {
@@ -440,19 +464,20 @@ string MyoData::recieveFromSerial() {
 				complete_string.append(received_string);
 
 				if (has_read) {
-					//OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
+					OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
 
 				}
 				else {
-					//OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
+					OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
 				}
 
 			} while (recieved_char[0] != '}');
 
-			saveIncJson(complete_string);
-			stringstream msg;
-			msg << "MyoData::recieveFromSerial -> " << complete_string << "\n";
-			OutputDebugStringA(msg.str().c_str());
+			
+			//stringstream msg;
+			//msg << "MyoData::recieveFromSerial -> " << complete_string << "\n";
+			//utputDebugStringA(msg.str().c_str());
+
 			return complete_string;
 		}
 		else {
@@ -464,19 +489,14 @@ string MyoData::recieveFromSerial() {
 	return "";
 }
 
-/*string MyoData::returnCurrTime() {
+auto MyoData::returnCurrTime() {
 
-	time_t curr_time;
-	tm * curr_tm;
-	char date_string[100];
-	char time_string[100];
+	auto curr_time = std::chrono::system_clock::now();
 
-	time(&curr_time);
-	curr_tm = localtime(&curr_time);	
-	strftime(time_string, 50, "Current time is %T", curr_tm);
+	std::time_t timestamp = std::chrono::system_clock::to_time_t(curr_time);
 
-	return curr_tm;
-}*/
+	return timestamp;
+}
 
 MyoData::~MyoData() {
 	inc_json_file.close();
