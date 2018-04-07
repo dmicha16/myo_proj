@@ -1,50 +1,27 @@
 #include "stdafx.h"
 #include "MyoData.h"
 
-#include <array>
-#include <sstream>
-#include <stdexcept>
-#include <Windows.h>
-
-#include <chrono>
-#include <thread>
-#include <iomanip>
-#include <ctime>
-#include <ratio>
-
-#define DATA_LENGTH 255
-
-#define MODE_MANUAL 1
-#define MODE_PRESET 2
-#define MODE_DEVEL 3
-#define MODE_EXIT 4
-#define COM6 "\\\\.\\COM7"		
-#define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
-
-using namespace std;
 using json = nlohmann::json;
 using namespace std::chrono;
 
-MyoData::MyoData()
-{
+MyoData::MyoData() {
 	json_id_ = 0;
 	output_json_file.open("output_json_file.txt");
 	inc_json_file.open("inc_json_file.txt");	
 	arduino_obj_ = new SerialPort(COM6);
 
-	string mode;	
-	cout << "Press 'd' and 'Enter' to go into developer mode. \n";
-	cin >> mode;
+	std::string mode;	
+	std::cout << "Press 'd' and 'Enter' to go into developer mode. \n";
+	std::cin >> mode;
 
-	if (mode == "d")
-	{
+	if (mode == "d") {
 		int myo_mode;
-		cout << "myo mode: ";
-		cin >> myo_mode;
+		std::cout << "myo mode: ";
+		std::cin >> myo_mode;
 
-		string gesture;
-		cout << "gesture: ";
-		cin >> gesture;
+		std::string gesture;
+		std::cout << "gesture: ";
+		std::cin >> gesture;
 
 		populateJson(myo_mode, gesture);
 	}
@@ -57,18 +34,17 @@ MyoData::MyoData()
 int MyoData::connectToMyo()
 {	
 	myo::Hub hub("com.project.myo_project");
-
-	cout << "\r";
-	cout << "Attempting to find a Myo..." << string(50, ' ');
+	std::cout << "\r";
+	std::cout << "Attempting to find a Myo..." << std::string(50, ' ');
 
 	myo::Myo* myo = hub.waitForMyo(10000);
 
 	if (!myo) {
-		throw runtime_error("Unable to find a Myo!");
+		throw std::runtime_error("Unable to find a Myo!");
 	}
 
-	cout << "\r";
-	cout << "Connected to a Myo armband!" << string(50, ' ');
+	std::cout << "\r";
+	std::cout << "Connected to a Myo armband!" << std::string(50, ' ');
 
 	hub.addListener(this);
 
@@ -78,41 +54,41 @@ int MyoData::connectToMyo()
 		hub.run(1000 / 25);		
 		mode_type_ = switchModes();
 
-		if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL || mode_type_ == MODE_EXIT)
+		if (mode_type_ == MANUAL || mode_type_ == PRESET || mode_type_ == DEVEL || mode_type_ == EXIT)
 			break;
 	}
 
 	DELAY_OF_ONE_SEC;
 
-	if (mode_type_ == MODE_MANUAL || mode_type_ == MODE_PRESET || mode_type_ == MODE_DEVEL) {
+	if (mode_type_ == MANUAL || mode_type_ == PRESET || mode_type_ == DEVEL) {
 
-		if (mode_type_ == MODE_MANUAL) {
+		if (mode_type_ == MANUAL) {
 
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = manualMode();
 
-				if (mode_type_ == MODE_EXIT)
+				if (mode_type_ == EXIT)
 					break;
 			}
 		}
-		else if (mode_type_ == MODE_PRESET) {
+		else if (mode_type_ == PRESET) {
 
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = presetMode();
 
-				if (mode_type_ == MODE_EXIT)
+				if (mode_type_ == EXIT)
 					break;
 			}
 		}
-		else if (mode_type_ == MODE_DEVEL) {
+		else if (mode_type_ == DEVEL) {
 
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = developerMode();
 
-				if (mode_type_ == MODE_EXIT)
+				if (mode_type_ == EXIT)
 					break;
 			}			
 		}
@@ -134,7 +110,7 @@ void MyoData::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 	myo->notifyUserAction();
 }
 
-int MyoData::returnGestureNumber(string p_inc_gesture) {	
+int MyoData::returnGestureNumber(std::string p_inc_gesture) {
 
 	int gesture_number_ = 0;
 
@@ -175,31 +151,31 @@ int MyoData::switchModes() {
 	switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:  
 		std::cout << '\r';
-		cout << "You choose: 'Manual Mode'" << string(55, ' ');		
-		return MODE_MANUAL;
+		std::cout << "You choose: 'Manual Mode'" << std::string(55, ' ');
+		return MANUAL;
 		break;
 
 	case 2:
 		std::cout << '\r';
-		cout << "You choose: 'Preset Mode'" << string(55, ' ');		
-		return MODE_PRESET;
+		std::cout << "You choose: 'Preset Mode'" << std::string(55, ' ');
+		return PRESET;
 		break;
 
 	/*case 3:
 		std::cout << '\r';
 		cout << "You choose: 'Developer Mode'" << string(55, ' ');		
-		return MODE_DEVEL;
+		return DEVEL;
 		break;*/
 
 	case 5:
 		std::cout << '\r';
-		cout << "Quitting the program!'" << string(65, ' ');
-		return MODE_EXIT;
+		std::cout << "Quitting the program!'" << std::string(65, ' ');
+		return EXIT;
 		break;
 
 	default:		
 		std::cout << '\r';
-		cout << "FIST: Manual Mode, " << "SPREAD: Preset Mode, " << "WAVEIN: Developer Mode, " << "DOUBLETAP: Quit." << string(15, ' ');
+		std::cout << "FIST: Manual Mode, " << "SPREAD: Preset Mode, " << "WAVEIN: Developer Mode, " << "DOUBLETAP: Quit." << std::string(15, ' ');
 		break;
 	}
 }
@@ -207,48 +183,48 @@ int MyoData::switchModes() {
 int MyoData::manualMode() {
 
 	gesture_number_ = 0;	
-	mode_type_ = MODE_MANUAL;
+	mode_type_ = MANUAL;
 		switch (gesture_number_ = returnGestureNumber(currentPose.toString())) {
 		case 1:
 			std::cout << '\r';
-			cout << "FIST: Moving end effector: DOWN" << string(25, ' ');			
+			std::cout << "FIST: Moving end effector: DOWN" << std::string(25, ' ');
 			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 2:
 			std::cout << '\r';
-			cout << "SPREAD: Moving end effector: UP" << string(25, ' ');			
+			std::cout << "SPREAD: Moving end effector: UP" << std::string(25, ' ');
 			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 3:
 			std::cout << '\r'; 
-			cout << "WAVEIN: Moving end effector: LEFT" << string(25, ' ');			
+			std::cout << "WAVEIN: Moving end effector: LEFT" << std::string(25, ' ');
 			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 4:
 			std::cout << '\r';
-			cout << "WAVEOUT: Moving end effector: RIGHT" << string(25, ' ');			
+			std::cout << "WAVEOUT: Moving end effector: RIGHT" << std::string(25, ' ');
 			populateJson(mode_type_, currentPose.toString());
 			break;
 
 		case 5:
 			std::cout << '\r';
-			cout << "DOUBLE TAP, you are QUITTING this mode" << string(25, ' ') << "\n";			
+			std::cout << "DOUBLE TAP, you are QUITTING this mode" << std::string(25, ' ') << "\n";
 			gesture_number_ = 0;
-			return MODE_EXIT;
+			return EXIT;
 			break;
 
 		case 6: 
 			std::cout << '\r';
-			cout << "You are in REST, nothing is happening..." << string(25, ' ');
+			std::cout << "You are in REST, nothing is happening..." << std::string(25, ' ');
 			//populateJson(mode_type_, currentPose.toString());
 			break;		
 
 		default:
 			std::cout << '\r';
-			cout << "Uninterpretable gesture." << string(25, ' ');			
+			std::cout << "Uninterpretable gesture." << std::string(25, ' ');
 			break;
 		}	
 }
@@ -256,58 +232,58 @@ int MyoData::manualMode() {
 int MyoData::presetMode() {
 
 	gesture_number_ = 0;
-	mode_type_ = MODE_PRESET;
+	mode_type_ = PRESET;
 	
 	switch(gesture_number_ = returnGestureNumber(currentPose.toString())) {
 	case 1:
 		std::cout << '\r';
-		cout << "Closing gripper." << string(65, ' ');
+		std::cout << "Closing gripper." << std::string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 2:
 		std::cout << '\r';
-		cout << "Moving to extend." << string(65, ' ');
+		std::cout << "Moving to extend." << std::string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 3:
 		std::cout << '\r';
-		cout << "Moving to user." << string(65, ' ');
+		std::cout << "Moving to user." << std::string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 4:
 		std::cout << '\r';
-		cout << "Moving home." << string(65, ' ');
+		std::cout << "Moving home." << std::string(65, ' ');
 		populateJson(mode_type_, currentPose.toString());
 		break;
 
 	case 5:
 		std::cout << '\r';
-		cout << "DOUBLE TAP, you are QUITTING this mode" << string(55, ' ') << "\n";
+		std::cout << "DOUBLE TAP, you are QUITTING this mode" << std::string(55, ' ') << "\n";
 		gesture_number_ = 0;
-		return MODE_EXIT;
+		return EXIT;
 		break;
 
 	case 6:
 		std::cout << '\r';
-		cout << "FIST: Close the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << string(15, ' ');
+		std::cout << "FIST: Close the gripper, " << "SPREAD: Extend, " << "WAVEOUT: Home," << "WAVEIN: Move to user." << std::string(15, ' ');
 		break;
 
 	default:
 		std::cout << '\r';
-		cout << "Uninterpretable gesture." << string(65, ' ');
+		std::cout << "Uninterpretable gesture." << std::string(65, ' ');
 		break;
 	}
 }
 
 int MyoData::developerMode() {
-	cout << "yey you made it to devel mode";
-	return MODE_EXIT;
+	std::cout << "yey you made it to devel mode";
+	return EXIT;
 }
 
-void MyoData::populateJson(int p_mode, string p_gesture) {
+void MyoData::populateJson(int p_mode, std::string p_gesture) {
 
 	json_id_++;
 	json pose_json_;			
@@ -322,14 +298,14 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 
 	output_json_ = pose_json_.dump();	
 
-	if (p_mode == MODE_MANUAL) {
+	if (p_mode == MANUAL) {
 
 		saveJson(output_json_);
 		sendToSerial(output_json_);
 	}
-	else if (p_mode == MODE_PRESET) {
+	else if (p_mode == PRESET) {
 
-		string response_from_robot;
+		std::string response_from_robot;
 		bool empty_response = false;
 
 		saveJson(output_json_);
@@ -338,13 +314,13 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 		for (size_t i = 0; i < 5; i++) {
 
 			DELAY_OF_ONE_SEC;
-			cout << '\r';
-			cout << "Waiting for response from the robot.." << string(55, ' ');			
+			std::cout << '\r';
+			std::cout << "Waiting for response from the robot.." << std::string(55, ' ');
 			response_from_robot = recieveFromSerial();
 			saveIncJson(response_from_robot);
 			//char *inc_json_char = &response_from_robot[0];
 
-			stringstream response;
+			std::stringstream response;
 			response << response_from_robot;
 			OutputDebugString(L"PopulateJson response: \n");
 			OutputDebugStringA(response.str().c_str());
@@ -353,16 +329,16 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 			OutputDebugString(L"populateJson -> Successful parsing to Json \n");
 
 			if (incoming_json["action_status"] == "true") {
-				cout << "\r";
-				cout << "Response is ok! \n" << string(50, ' ');
+				std::cout << "\r";
+				std::cout << "Response is ok! \n" << std::string(50, ' ');
 				empty_response = true;
 				
 				connectToMyo();
 			}
 		}
 		if (!empty_response) {
-			cout << '\r';
-			cout << "No response from the robot! We gotta quit bro..." << string(35, ' ');
+			std::cout << '\r';
+			std::cout << "No response from the robot! We gotta quit bro..." << std::string(35, ' ');
 			
 			DELAY_OF_ONE_SEC;
 			DELAY_OF_ONE_SEC;
@@ -371,17 +347,17 @@ void MyoData::populateJson(int p_mode, string p_gesture) {
 	}	
 }
 
-void MyoData::saveJson(string p_json) {
+void MyoData::saveJson(std::string p_json) {
 	
 	output_json_file << p_json << "\n";
 }
 
-void MyoData::saveIncJson(string p_json) {
+void MyoData::saveIncJson(std::string p_json) {
 
 	inc_json_file << p_json << "\n";
 }
 
-void MyoData::sendToSerial(string p_output_json) {
+void MyoData::sendToSerial(std::string p_output_json) {
 
 	//char *output_serial_ = _strdup(p_output_json.c_str());
 	char *output_serial_ = &p_output_json[0];
@@ -399,11 +375,11 @@ void MyoData::sendToSerial(string p_output_json) {
 	}
 }
 
-string MyoData::recieveFromSerial() {
+std::string MyoData::recieveFromSerial() {
 
 	char recieved_char[DATA_LENGTH];
 
-	string received_string;
+	std::string received_string;
 
 	if (arduino_obj_->isConnected()) {
 
@@ -416,7 +392,7 @@ string MyoData::recieveFromSerial() {
 			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
 			if (counter == 1)
 			{
-				stringstream ss;
+				std::stringstream ss;
 				ss << received_string;
 				OutputDebugStringA(ss.str().c_str());
 				return received_string;
