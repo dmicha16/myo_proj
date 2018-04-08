@@ -2,7 +2,6 @@
 #include "MyoData.h"
 
 using json = nlohmann::json;
-using namespace std::chrono;
 
 MyoData::MyoData() {
 	json_id_ = 0;
@@ -26,29 +25,28 @@ MyoData::MyoData() {
 		populateJson(myo_mode, gesture);
 	}
 	else
-		connectToMyo();	
-	
+		connectToMyo();		
 	//cout << COM6 << " is connected: " << arduino_obj_->isConnected() << "\n";	
 }
 
-int MyoData::connectToMyo()
-{	
+int MyoData::connectToMyo() {
+
 	myo::Hub hub("com.project.myo_project");
-	std::cout << "\r";
-	std::cout << "Attempting to find a Myo..." << std::string(50, ' ');
+	for (size_t i = 0; i < 3; i++) {		
+		std::cout << "\r";
+		std::cout << "Attempting to find a Myo..." << std::string(50, ' ');
+		myo::Myo* myo = hub.waitForMyo(10000);
 
-	myo::Myo* myo = hub.waitForMyo(10000);
-
-	if (!myo) {
-		throw std::runtime_error("Unable to find a Myo!");
-	}
+		if (!myo) {
+			throw std::runtime_error("Unable to find a Myo!");
+		}
+	}	
 
 	std::cout << "\r";
 	std::cout << "Connected to a Myo armband!" << std::string(50, ' ');
-
 	hub.addListener(this);
 
-	DELAY_OF_ONE_SEC;
+	DELAY(1000);
 	
 	while (1) {
 		hub.run(1000 / 25);		
@@ -58,7 +56,7 @@ int MyoData::connectToMyo()
 			break;
 	}
 
-	DELAY_OF_ONE_SEC;
+	DELAY(1000);
 
 	if (mode_type_ == MANUAL || mode_type_ == PRESET || mode_type_ == DEVEL) {
 
@@ -286,17 +284,17 @@ int MyoData::developerMode() {
 void MyoData::populateJson(int p_mode, std::string p_gesture) {
 
 	json_id_++;
-	json pose_json_;			
+	json pose_json;			
 
 	//int local_gesture_number = returnGestureNumber(p_gesture);
 
-	pose_json_ = {
+	pose_json = {
 		{ "id", json_id_ },
 		{ "mode", p_mode },
 		{ "gesture", p_gesture }
 	};
 
-	output_json_ = pose_json_.dump();	
+	output_json_ = pose_json.dump();	
 
 	if (p_mode == MANUAL) {
 
@@ -313,7 +311,7 @@ void MyoData::populateJson(int p_mode, std::string p_gesture) {
 
 		for (size_t i = 0; i < 5; i++) {
 
-			DELAY_OF_ONE_SEC;
+			DELAY(1000);
 			std::cout << '\r';
 			std::cout << "Waiting for response from the robot.." << std::string(55, ' ');
 			response_from_robot = recieveFromSerial();
@@ -340,8 +338,7 @@ void MyoData::populateJson(int p_mode, std::string p_gesture) {
 			std::cout << '\r';
 			std::cout << "No response from the robot! We gotta quit bro..." << std::string(35, ' ');
 			
-			DELAY_OF_ONE_SEC;
-			DELAY_OF_ONE_SEC;
+			DELAY(2000);
 			exit(0);
 		}
 	}	

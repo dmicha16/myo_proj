@@ -22,9 +22,9 @@
 #include <ratio>
 
 #define DATA_LENGTH 255
+#define DELAY(delay) std::this_thread::sleep_for(std::chrono::milliseconds(delay))
 
-#define COM6 "\\\\.\\COM7"		
-#define DELAY_OF_ONE_SEC std::this_thread::sleep_for(std::chrono::milliseconds(1000))
+#define COM6 "\\\\.\\COM7"
 
 enum Modes { MANUAL = 1, PRESET = 2, DEVEL = 3, EXIT = 4 };
 
