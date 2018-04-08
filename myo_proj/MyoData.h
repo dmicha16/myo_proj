@@ -5,26 +5,33 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-
-#include "json.hpp"
-#include "SerialPort.h"
-#include <myo/myo.hpp>
-
 #include <array>
 #include <sstream>
 #include <stdexcept>
-#include <Windows.h>
-
 #include <chrono>
 #include <thread>
 #include <iomanip>
 #include <ctime>
 #include <ratio>
 
+#include "json.hpp"
+#include "SerialPort.h"
+#include <myo/myo.hpp>
+
 #define DATA_LENGTH 255
 #define DELAY(delay) std::this_thread::sleep_for(std::chrono::milliseconds(delay))
 
+#define USE_WINDOWS_H
+
 #define COM6 "\\\\.\\COM7"
+
+#ifdef USE_WINDOWS_H
+#include <Windows.h>
+#endif
+
+#ifdef LOGGING
+#include "Logger.h"
+#endif 
 
 enum Modes { MANUAL = 1, PRESET = 2, DEVEL = 3, EXIT = 4 };
 

@@ -55,13 +55,11 @@ int MyoData::connectToMyo() {
 		if (mode_type_ == MANUAL || mode_type_ == PRESET || mode_type_ == DEVEL || mode_type_ == EXIT)
 			break;
 	}
-
 	DELAY(1000);
 
 	if (mode_type_ == MANUAL || mode_type_ == PRESET || mode_type_ == DEVEL) {
 
 		if (mode_type_ == MANUAL) {
-
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = manualMode();
@@ -71,7 +69,6 @@ int MyoData::connectToMyo() {
 			}
 		}
 		else if (mode_type_ == PRESET) {
-
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = presetMode();
@@ -81,7 +78,6 @@ int MyoData::connectToMyo() {
 			}
 		}
 		else if (mode_type_ == DEVEL) {
-
 			while (true) {
 				hub.run(1000 / 20);
 				mode_type_ = developerMode();
@@ -90,10 +86,8 @@ int MyoData::connectToMyo() {
 					break;
 			}			
 		}
-		
 		connectToMyo();		
 	} 
-	
 	else {
 		exit(0);
 	}
@@ -324,7 +318,7 @@ void MyoData::populateJson(int p_mode, std::string p_gesture) {
 			OutputDebugStringA(response.str().c_str());
 
 			json incoming_json = json::parse(response);
-			OutputDebugString(L"populateJson -> Successful parsing to Json \n");
+			OutputDebugString(L"populateJson -> Successful parsing to JSON \n");
 
 			if (incoming_json["action_status"] == "true") {
 				std::cout << "\r";
@@ -386,7 +380,7 @@ std::string MyoData::recieveFromSerial() {
 		int counter = 1;
 
 		if (has_read) {			
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data recieved \n");
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data received \n");
 			if (counter == 1)
 			{
 				std::stringstream ss;
@@ -396,7 +390,7 @@ std::string MyoData::recieveFromSerial() {
 			}
 		}
 		else {
-			OutputDebugString(L"MyoData::recieveFromSerial -> Data not recieved \n");
+			OutputDebugString(L"MyoData::recieveFromSerial -> Data not received \n");
 			return "";
 		}		
 	}
